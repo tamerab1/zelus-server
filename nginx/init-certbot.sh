@@ -4,7 +4,7 @@
 #
 # Prerequisites:
 #   - Docker + Docker Compose installed
-#   - DNS A records for zelus.gg, www.zelus.gg, api.zelus.gg pointing to this server
+#   - DNS A records for zelusrsps.com, www.zelusrsps.com, api.zelusrsps.com pointing to this server
 #   - .env file populated (cp .env.example .env && nano .env)
 #
 # Usage:
@@ -20,8 +20,8 @@ if [ ! -f .env ]; then
 fi
 source .env
 
-DOMAIN="${DOMAIN:-zelus.gg}"
-EMAIL="${EMAIL:-admin@zelus.gg}"
+DOMAIN="${DOMAIN:-zelusrsps.com}"
+EMAIL="${EMAIL:-admin@zelusrsps.com}"
 STAGING="${STAGING:-0}"   # set STAGING=1 in .env to test without rate-limit
 
 # ── Step 1: Spin up Nginx (HTTP only for ACME challenge) ─────────────────────

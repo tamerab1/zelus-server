@@ -59,7 +59,7 @@ services:
       context: ./zelus-website-client
       dockerfile: Dockerfile
       args:
-        VITE_API_URL:            ${VITE_API_URL:-https://api.zelus.gg}
+        VITE_API_URL:            ${VITE_API_URL:-https://api.zelusrsps.com}
         VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-}
     image: zelus/website:latest
     container_name: zelus_website
