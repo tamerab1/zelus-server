@@ -1,0 +1,57 @@
+package com.near_reality.plugins.shops
+
+import com.near_reality.scripts.shops.ShopScript
+import com.zenyte.game.model.shop.ShopPolicy.*
+import com.zenyte.game.model.shop.ShopCurrency
+import com.zenyte.game.item.ItemId.*
+
+class `Bounty Hunter Shop` : ShopScript() {
+    init {
+        "Bounty Hunter Shop"(153, ShopCurrency.BH_POINTS, STOCK_ONLY) {
+            VESTAS_HELM(100, 2500, 5000)
+            MORRIGANS_COIF_27836(100, 20000, 45000)
+            ZURIELS_HOOD_27839(100, 20000, 45000)
+            STATIUSS_FULL_HELM_27833(100, 15000, 35000)
+//            ECLIPSE_MOON_HELM(100, 10000, 25000)
+//            BLOOD_MOON_HELM(100, 7500, 15000)
+//            BLUE_MOON_HELM(100, 7500, 15000)
+            NEITIZNOT_FACEGUARD(100, 6000, 12500)
+            VESTAS_CHAINBODY_27831(100, 25000, 50000)
+            MORRIGANS_LEATHER_BODY_27837(100, 25000, 50000)
+            ZURIELS_ROBE_TOP_27840(100, 25000, 50000)
+            STATIUSS_PLATEBODY_27834(100, 15000, 35000)
+//            ECLIPSE_MOON_CHESTPLATE(100, 10000, 25000)
+//            BLOOD_MOON_CHESTPLATE(100, 10000, 20000)
+//            BLUE_MOON_CHESTPLATE(100, 8000, 20000)
+            BANDOS_CHESTPLATE(100, 2500, 5000)
+            VESTAS_PLATESKIRT_27832(100, 25000, 50000)
+            MORRIGANS_LEATHER_CHAPS_27838(100, 25000, 50000)
+            ZURIELS_ROBE_BOTTOM_27841(100, 25000, 50000)
+            STATIUSS_PLATELEGS_27835(100, 15000, 35000)
+//            ECLIPSE_MOON_TASSETS(100, 10000, 25000)
+//            BLOOD_MOON_TASSETS(100, 10000, 20000)
+//            BLUE_MOON_TASSETS(100, 10000, 20000)
+            BANDOS_TASSETS(100, 2500, 5000)
+            VESTAS_LONGSWORD(100, 17500, 25000)
+            STATIUSS_WARHAMMER(100, 20500, 35000)
+            VESTAS_SPEAR(100, 17500, 25000)
+            ZURIELS_STAFF(100, 7500, 15000)
+            //PRIMORDIAL_BOOTS(100, 2500, 5000)
+            //ETERNAL_BOOTS(100, 2500, 5000)
+            //PEGASIAN_BOOTS(100, 2500, 5000)
+            //DRAGON_BOOTS(100, 50, 100)
+//            ECLIPSE_ATLATL(100, 7500, 20000)
+//            DUAL_MACUAHUITL(100, 7500, 20000)
+//            BLUE_MOON_SPEAR(100, 5000, 15000)
+            ECHO_BOOTS(100, 5000, 15000)
+            AMULET_OF_TORTURE(100, 4500, 5000)
+            NECKLACE_OF_ANGUISH(100, 4500, 5000)
+            AMULET_OF_FURY(100, 250, 500)
+            AMULET_OF_BLOOD_FURY(100, 750, 1500)
+            VENATOR_RING_28310(100, 17500, 90000)
+            BELLATOR_RING_28316(100, 17500, 90000)
+            MAGUS_RING_28313(100, 22500, 95000)
+            ULTOR_RING_28307(100, 30000, 100000,)
+        }
+    }
+}

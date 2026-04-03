@@ -1,0 +1,74 @@
+[
+  {
+    "handledDate": "2025-02-26T02:31:38.3186833",
+    "requesterUsername": "mew",
+    "accepterUsername": "muk",
+    "requesterDonatorPin": {
+      "id": 32072,
+      "amount": 1
+    },
+    "accepterContainer": {
+      "type": "TRADE",
+      "policy": "NORMAL",
+      "items": {}
+    },
+    "accepterOSRSMillions": 0,
+    "staffOption": {
+      "type": "Any"
+    }
+  },
+  {
+    "handledDate": "2025-02-26T02:32:55.7150387",
+    "requesterUsername": "mew",
+    "accepterUsername": "muk",
+    "requesterDonatorPin": {
+      "id": 32070,
+      "amount": 1
+    },
+    "accepterContainer": {
+      "type": "TRADE",
+      "policy": "NORMAL",
+      "items": {}
+    },
+    "accepterOSRSMillions": 0,
+    "staffOption": {
+      "type": "Any"
+    }
+  },
+  {
+    "handledDate": "2025-02-26T02:33:02.9151823",
+    "requesterUsername": "mew",
+    "accepterUsername": "muk",
+    "requesterDonatorPin": {
+      "id": 32071,
+      "amount": 2
+    },
+    "accepterContainer": {
+      "type": "TRADE",
+      "policy": "NORMAL",
+      "items": {}
+    },
+    "accepterOSRSMillions": 0,
+    "staffOption": {
+      "type": "Any"
+    }
+  },
+  {
+    "handledDate": "2025-02-26T02:33:10.1152331",
+    "requesterUsername": "mew",
+    "accepterUsername": "muk",
+    "requesterDonatorPin": {
+      "id": 32073,
+      "amount": 1
+    },
+    "accepterContainer": {
+      "type": "TRADE",
+      "policy": "NORMAL",
+      "items": {}
+    },
+    "accepterOSRSMillions": 0,
+    "staffOption": {
+      "type": "Any"
+    }
+  }
+]

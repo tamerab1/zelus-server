@@ -1,0 +1,33 @@
+{
+  "_comment": "This file is served from your Cloudflare R2 bucket at https://patch.zelus.gg/manifest.json",
+  "_comment2": "Update sha256 by running: sha256sum <file> (Linux/Mac) or Get-FileHash <file> (PowerShell)",
+
+  "launcher_version": "1.0.0",
+
+  "client": {
+    "version":    "1.0.0",
+    "filename":   "zelus-client-1.0.0.jar",
+    "url":        "https://patch.zelus.gg/releases/zelus-client-1.0.0.jar",
+    "sha256":     "REPLACE_WITH_SHA256_OF_CLIENT_JAR",
+    "size_bytes": 0
+  },
+
+  "cache": {
+    "version":    "1",
+    "filename":   "cache-1.zip",
+    "url":        "https://patch.zelus.gg/cache/cache-1.zip",
+    "sha256":     "REPLACE_WITH_SHA256_OF_CACHE_ZIP",
+    "size_bytes": 0
+  },
+
+  "jvm_args": [
+    "-Xmx512m",
+    "-Xms256m",
+    "-Dfile.encoding=UTF-8",
+    "-Djava.net.preferIPv4Stack=true"
+  ],
+
+  "main_class":  "client.Main",
+  "game_server": "zelus.gg",
+  "game_port":   43594
+}

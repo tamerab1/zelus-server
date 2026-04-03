@@ -1,0 +1,93 @@
+package com.near_reality.plugins.shops
+
+import com.near_reality.scripts.shops.ShopScript
+import com.zenyte.game.item.ItemId.*
+import com.zenyte.game.model.shop.ShopCurrency
+import com.zenyte.game.model.shop.ShopPolicy.STOCK_ONLY
+
+class `PVP SHOP` : ShopScript() {
+    init {
+        "PVP SHOP"(290, ShopCurrency.BLOOD_MONEY, STOCK_ONLY) {
+            //PVP_MYSTERY_BOX(100, 10000, 20000)
+            OSMUMTENS_FANG(100, 50000, 75000, )
+            //VESTAS_LONGSWORD(100, 25000, 50000)
+            //STATIUSS_WARHAMMER(100, 25000, 50000)
+            BOW_OF_FAERDHINEN_C(100, 40000, 75000)
+            ELIDINIS_WARD(100, 25000, 50000)
+            ELDER_MAUL(100, 20000, 40000)
+            DRAGON_CLAWS(100, 15000, 30000)
+            BLADE_OF_SAELDOR_C(100, 12500, 25000)
+            TOXIC_STAFF_UNCHARGED(100, 3500, 5000)
+            ANCIENT_GODSWORD(100, 4000, 8000)
+            ARMADYL_GODSWORD(100, 1500, 5000)
+            BANDOS_GODSWORD(100, 500, 1000)
+            SARADOMIN_GODSWORD(100, 500, 1000)
+            ZAMORAK_GODSWORD(100, 500, 1000)
+            ZAMORAKIAN_SPEAR(100, 2500, 5000)
+            ZAMORAKIAN_HASTA(100, 2500, 5000)
+            GRANITE_MAUL_24225(100, 250, 500)
+            ABYSSAL_TENTACLE(100, 250, 500)
+            BLESSED_SPIRIT_SHIELD(100, 0, 200)
+            //32149(100, 100, 200) // larrans booster
+           // 32150(100, 75, 150) // gano booster
+            //32154(100, 150, 300) // blood money booster
+            //32166(100, 200, 400) // rev booster
+            //24187(100, 1300,2000)
+            MAGES_BOOK(100, 75, 200)
+            TOME_OF_FIRE_EMPTY(100, 250, 500)
+            BURNT_PAGE(1000, 1, 3)
+            OCCULT_NECKLACE(100, 1000, 1500)
+            AMULET_OF_FURY(100, 250, 500)
+            AMULET_OF_TORTURE(100, 4000, 8000)
+            NECKLACE_OF_ANGUISH(100, 4000, 8000)
+            DRAGON_BOOTS(100, 25, 75)
+            INFINITY_BOOTS(100, 150, 300)
+            PEGASIAN_BOOTS(100, 2500, 5000)
+            PRIMORDIAL_BOOTS(100, 2500, 5000)
+            ETERNAL_BOOTS(100, 2500, 5000)
+            MORRIGANS_THROWING_AXE(10000, 5, 10)
+            MORRIGANS_JAVELIN(10000, 25, 50)
+            ARMADYL_CROSSBOW(100, 2000, 3000)
+            DRAGON_CROSSBOW(100, 500, 750)
+            DRAGON_KNIFE(100000, 0, 1)
+            DRAGON_THROWNAXE(100000, 0, 1)
+            DRAGON_JAVELIN(100000, 0, 1)
+            DRAGON_DART(100000, 1, 2)
+            ANCIENT_MACE(100, 50, 125)
+            DRAGONSTONE_DRAGON_BOLTS_E(100000, 0,1)
+            RUBY_DRAGON_BOLTS_E(100000, 0,1)
+            OPAL_DRAGON_BOLTS_E(100000, 0,1)
+            DIAMOND_DRAGON_BOLTS_E(100000, 0, 1)
+            DRAGON_ARROW(100000, 1,2)
+            AMETHYST_ARROW(100000, 0,1)
+            BOLT_RACK(100000, 0,1)
+            RING_OF_WEALTH_SCROLL(100, 75,150)
+            MAGIC_SHORTBOW_SCROLL(100, 100,200)
+            LOOTING_BAG(100, 20,40)
+            ROYAL_SEED_POD(1000, 100,300)
+            REVENANT_CAVE_TELEPORT(1000, 0,1)
+            BURNING_AMULET5(100, 0,1)
+            MASTER_WAND(100, 125,250)
+            //SCROLL_OF_IMBUING(100, 150,300)
+            SARADOMINS_TEAR(100, 100, 200)
+            SARADOMIN_HALO(100, 125, 250)
+            GUTHIX_HALO(100, 125, 250)
+            ZAMORAK_HALO(100, 125, 250)
+            ARMADYL_HALO(100, 125, 250)
+            BANDOS_HALO(100, 125, 250)
+            SEREN_HALO(100, 125, 250)
+            ANCIENT_HALO(100, 125, 250)
+            BRASSICA_HALO(100, 125, 250)
+            //THREAD_OF_ELIDINIS(100, 1750, 2000)
+            RUNE_POUCH(100, 200,400)
+            (SUPER_COMBAT_POTION4+1)(1000, 0,25)
+            (SARADOMIN_BREW4+1)(1000, 0,25)
+            (SANFEW_SERUM4+1)(1000, 0,20)
+            (ANTIVENOM4_12913+1)(1000, 0,10)
+            (BASTION_POTION4+1)(1000, 0,15)
+            (SUPER_ANTIFIRE_POTION4+1)(1000, 0,15)
+            (COOKED_KARAMBWAN+1)(1000, 0,1)
+            (ANGLERFISH+1)(1000, 0,2)
+        }
+    }
+}

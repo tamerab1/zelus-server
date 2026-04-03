@@ -1,0 +1,65 @@
+# Environment files with real secrets
+.env
+.env.local
+.env.production
+!.env.example
+!.env.template
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Game server — large binary data (not for git)
+DMMPVP/cache/
+DMMPVP/data/characters/
+DMMPVP/data/backups/
+DMMPVP/data/logs/
+DMMPVP/logs/
+DMMPVP/dumps/
+DMMPVP/item-images/
+DMMPVP/data/models/
+
+# Build artifacts
+DMMPVP/app/build/
+DMMPVP/build/
+DMMPVP/.gradle/
+DMMPVP/.kotlin/
+DMMPVP/out/
+launcher/build/
+launcher/.gradle/
+FR client/build/
+FR client/**/build/
+FR client/.gradle/
+FR client/cache/
+
+# Logs
+*.log
+logs/
+
+# Misc
+*.rar
+*.zip
+new models/
+Update1.txt
+Updates.txt
+ip_test.txt

@@ -1,0 +1,206 @@
+# ── Zelus Launcher — GitHub Actions Release Pipeline ─────────────────────────
+# Triggers on any tag like v1.0.0
+# Builds native packages on Windows, macOS, and Linux runners in parallel.
+# Uploads all artifacts to the GitHub Release.
+
+name: Launcher Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write   # needed to create releases and upload assets
+
+jobs:
+
+  # ── Windows .exe ─────────────────────────────────────────────────────────────
+  build-windows:
+    name: Package Windows (.exe)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build fat JAR
+        working-directory: launcher
+        run: ./gradlew shadowJar
+
+      - name: Package with jpackage
+        working-directory: launcher
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          jpackage \
+            --type exe \
+            --name ZelusLauncher \
+            --app-version "$VERSION" \
+            --vendor Zelus \
+            --input build/libs \
+            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-class com.zelus.launcher.ZelusLauncher \
+            --dest build/dist \
+            --icon src/main/resources/zelus.ico \
+            --java-options "-Xmx256m" \
+            --java-options "-Dfile.encoding=UTF-8" \
+            --win-menu \
+            --win-shortcut \
+            --win-dir-chooser
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: launcher/build/dist/*.exe
+
+  # ── macOS .dmg ───────────────────────────────────────────────────────────────
+  build-macos:
+    name: Package macOS (.dmg)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build fat JAR
+        working-directory: launcher
+        run: ./gradlew shadowJar
+
+      - name: Package with jpackage
+        working-directory: launcher
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          jpackage \
+            --type dmg \
+            --name ZelusLauncher \
+            --app-version "$VERSION" \
+            --vendor Zelus \
+            --input build/libs \
+            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-class com.zelus.launcher.ZelusLauncher \
+            --dest build/dist \
+            --icon src/main/resources/zelus.icns \
+            --java-options "-Xmx256m" \
+            --mac-package-name ZelusLauncher
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: launcher/build/dist/*.dmg
+
+  # ── Linux .deb + AppImage ────────────────────────────────────────────────────
+  build-linux:
+    name: Package Linux (.deb + AppImage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install appimagetool
+        run: |
+          wget -q -O /usr/local/bin/appimagetool \
+            https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage
+          chmod +x /usr/local/bin/appimagetool
+
+      - name: Build fat JAR
+        working-directory: launcher
+        run: ./gradlew shadowJar
+
+      - name: Package .deb
+        working-directory: launcher
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          jpackage \
+            --type deb \
+            --name zelus-launcher \
+            --app-version "$VERSION" \
+            --vendor Zelus \
+            --input build/libs \
+            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-class com.zelus.launcher.ZelusLauncher \
+            --dest build/dist \
+            --icon src/main/resources/zelus.png \
+            --java-options "-Xmx256m" \
+            --linux-shortcut \
+            --linux-menu-group Games
+
+      - name: Package AppImage
+        working-directory: launcher
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          jpackage \
+            --type app-image \
+            --name ZelusLauncher \
+            --app-version "$VERSION" \
+            --input build/libs \
+            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-class com.zelus.launcher.ZelusLauncher \
+            --dest build/appimage-stage \
+            --icon src/main/resources/zelus.png \
+            --java-options "-Xmx256m"
+          ARCH=x86_64 appimagetool \
+            build/appimage-stage/ZelusLauncher \
+            "build/dist/ZelusLauncher-${VERSION}-x86_64.AppImage"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            launcher/build/dist/*.deb
+            launcher/build/dist/*.AppImage
+
+  # ── GitHub Release ────────────────────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Zelus Launcher ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/windows-exe/*.exe
+            artifacts/macos-dmg/*.dmg
+            artifacts/linux-packages/*.deb
+            artifacts/linux-packages/*.AppImage
+          body: |
+            ## Zelus Launcher ${{ github.ref_name }}
+
+            ### Download
+            | Platform | File |
+            |----------|------|
+            | Windows  | `ZelusLauncher-*.exe` |
+            | macOS    | `ZelusLauncher-*.dmg` |
+            | Linux (Debian/Ubuntu) | `zelus-launcher_*.deb` |
+            | Linux (Portable)      | `ZelusLauncher-*-x86_64.AppImage` |
+
+            ### Installation
+            - **Windows**: Run the `.exe` installer. A shortcut is added to the Start Menu.
+            - **macOS**: Open the `.dmg`, drag to Applications.
+            - **Linux (.deb)**: `sudo dpkg -i zelus-launcher_*.deb`
+            - **Linux (AppImage)**: `chmod +x *.AppImage && ./*.AppImage`

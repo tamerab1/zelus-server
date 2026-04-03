@@ -1,0 +1,12 @@
+[
+  {
+    "owner": "muk",
+    "rankedMembers": {},
+    "disabled": false,
+    "prefix": "raid",
+    "enterRank": "ANYONE",
+    "talkRank": "ANYONE",
+    "kickRank": "OWNER",
+    "permBannedMembers": []
+  },
+]

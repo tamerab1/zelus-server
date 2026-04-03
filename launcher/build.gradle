@@ -1,0 +1,114 @@
+// ── Zelus Launcher — Gradle Build ─────────────────────────────────────────────
+// Requires JDK 17+.  Build fat JAR:  ./gradlew shadowJar
+// Package for current OS:            ./gradlew jpackage
+// Package all platforms (CI only):   ./gradlew jpackageAll
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group   = 'com.zelus'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Gson for parsing manifest.json
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // FlatLaf for a modern dark look-and-feel (drop-in for Swing)
+    implementation 'com.formdev:flatlaf:3.4.1'
+    implementation 'com.formdev:flatlaf-extras:3.4.1'
+}
+
+application {
+    mainClass = 'com.zelus.launcher.ZelusLauncher'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class':       'com.zelus.launcher.ZelusLauncher',
+            'Implementation-Version': project.version,
+        )
+    }
+}
+
+shadowJar {
+    archiveClassifier = ''          // replaces the default JAR
+    archiveFileName   = "zelus-launcher-${version}.jar"
+    mergeServiceFiles()
+}
+
+// ── jpackage task ──────────────────────────────────────────────────────────────
+// jpackage ships with JDK 14+.  Run after ./gradlew shadowJar
+def launcherJar  = "${buildDir}/libs/zelus-launcher-${version}.jar"
+def jpackageBase = "${buildDir}/jpackage"
+def appVersion   = "${version}"
+def appVendor    = "Zelus"
+def appDesc      = "Zelus RSPS Launcher"
+
+tasks.register('jpackage', Exec) {
+    dependsOn 'shadowJar'
+    group     = 'distribution'
+    description = 'Packages the launcher for the current OS using jpackage.'
+
+    def os   = System.getProperty('os.name').toLowerCase()
+    def type = os.contains('win') ? 'exe'
+             : os.contains('mac') ? 'dmg'
+             : 'deb'
+
+    def iconFlag = os.contains('win') ? ['--icon', 'src/main/resources/zelus.ico']
+                 : os.contains('mac') ? ['--icon', 'src/main/resources/zelus.icns']
+                 : ['--icon', 'src/main/resources/zelus.png']
+
+    commandLine(
+        'jpackage',
+        '--type',           type,
+        '--name',           'ZelusLauncher',
+        '--app-version',    appVersion,
+        '--vendor',         appVendor,
+        '--description',    appDesc,
+        '--input',          "${buildDir}/libs",
+        '--main-jar',       "zelus-launcher-${version}.jar",
+        '--main-class',     'com.zelus.launcher.ZelusLauncher',
+        '--dest',           jpackageBase,
+        '--java-options',   '-Xmx256m',
+        '--java-options',   '-Dfile.encoding=UTF-8',
+        *iconFlag,
+        // Windows-specific: add a start-menu shortcut
+        *(os.contains('win') ? ['--win-menu', '--win-shortcut'] : []),
+        // macOS-specific: hide dock icon while updating
+        *(os.contains('mac') ? ['--mac-package-name', 'ZelusLauncher'] : []),
+        // Linux-specific: desktop integration
+        *(os.contains('linux') ? ['--linux-shortcut', '--linux-menu-group', 'Games'] : []),
+    )
+}
+
+// ── AppImage task (Linux CI) ────────────────────────────────────────────────
+tasks.register('appimage', Exec) {
+    dependsOn 'shadowJar'
+    group     = 'distribution'
+    description = 'Builds a portable AppImage (Linux only, requires appimagetool).'
+
+    commandLine(
+        'jpackage',
+        '--type',         'app-image',
+        '--name',         'ZelusLauncher',
+        '--app-version',  appVersion,
+        '--input',        "${buildDir}/libs",
+        '--main-jar',     "zelus-launcher-${version}.jar",
+        '--main-class',   'com.zelus.launcher.ZelusLauncher',
+        '--dest',         "${jpackageBase}/appimage",
+        '--java-options', '-Xmx256m',
+    )
+}
