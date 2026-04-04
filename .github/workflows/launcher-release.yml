@@ -85,13 +85,13 @@ jobs:
         shell: bash
         run: |
           cd launcher/build/dist
-          7z a "ZelusLauncher-${VERSION}-windows.zip" ZelusLauncher/
+          7z a "ZelusLauncher-windows.zip" ZelusLauncher/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-zip
-          path: launcher/build/dist/ZelusLauncher-*-windows.zip
+          path: launcher/build/dist/ZelusLauncher-windows.zip
 
   # ── macOS ─────────────────────────────────────────────────────────────────────
   build-macos:
@@ -142,13 +142,13 @@ jobs:
             $ICON_FLAG
 
       - name: Rename DMG
-        run: mv launcher/build/dist/ZelusLauncher-*.dmg launcher/build/dist/ZelusLauncher-${VERSION}-mac.dmg
+        run: mv launcher/build/dist/ZelusLauncher-*.dmg launcher/build/dist/ZelusLauncher-mac.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
-          path: launcher/build/dist/ZelusLauncher-*-mac.dmg
+          path: launcher/build/dist/ZelusLauncher-mac.dmg
 
   # ── Linux ─────────────────────────────────────────────────────────────────────
   build-linux:
@@ -199,11 +199,14 @@ jobs:
             --linux-menu-group Games \
             $ICON_FLAG
 
+      - name: Rename DEB
+        run: mv launcher/build/dist/*.deb launcher/build/dist/ZelusLauncher-linux.deb
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-deb
-          path: launcher/build/dist/*.deb
+          path: launcher/build/dist/ZelusLauncher-linux.deb
 
   # ── GitHub Release ─────────────────────────────────────────────────────────────
   release:
@@ -223,17 +226,17 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/windows-zip/*.zip
-            artifacts/macos-dmg/*.dmg
-            artifacts/linux-deb/*.deb
+            artifacts/windows-zip/ZelusLauncher-windows.zip
+            artifacts/macos-dmg/ZelusLauncher-mac.dmg
+            artifacts/linux-deb/ZelusLauncher-linux.deb
           body: |
             ## Zelus Launcher ${{ github.ref_name }}
 
             ### Download
             | Platform | File |
             |----------|------|
-            | Windows  | `ZelusLauncher-*-windows.zip` — extract and run `ZelusLauncher.exe` |
-            | macOS    | `ZelusLauncher-*-mac.dmg` — open and drag to Applications |
-            | Linux    | `zelus-launcher_*.deb` — `sudo dpkg -i zelus-launcher_*.deb` |
+            | Windows  | `ZelusLauncher-windows.zip` — extract and run `ZelusLauncher.exe` |
+            | macOS    | `ZelusLauncher-mac.dmg` — open and drag to Applications |
+            | Linux    | `ZelusLauncher-linux.deb` — `sudo dpkg -i ZelusLauncher-linux.deb` |
 
             The launcher auto-updates the game client on every launch.
