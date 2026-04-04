@@ -362,11 +362,6 @@ public final class LoginManager {
 
                     if (GameConstants.isOwner(player) && !player.getPrivilege().eligibleTo(PlayerPrivilege.DEVELOPER))
                         player.setPrivilege(PlayerPrivilege.DEVELOPER, false);
-                    else if (GameConstants.WORLD_PROFILE.isDevelopment()) {
-                        if (!player.getPrivilege().eligibleTo(PlayerPrivilege.FORUM_MODERATOR)) {
-                            player.setPrivilege(PlayerPrivilege.FORUM_MODERATOR, false);
-                        }
-                    }
 
                     cachedPlayers.remove(username);
 
