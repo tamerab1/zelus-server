@@ -60,7 +60,7 @@ jobs:
           ls -la build/libs/ 2>&1 || echo "(directory does not exist)"
           exit $GRADLE_EXIT
 
-      - name: Build app-image (portable, no WiX required)
+      - name: Build Windows installer (.exe)
         working-directory: launcher
         shell: bash
         run: |
@@ -68,7 +68,7 @@ jobs:
           ICON_FLAG=""
           [ -f src/main/resources/zelus.ico ] && ICON_FLAG="--icon src/main/resources/zelus.ico"
           jpackage \
-            --type app-image \
+            --type exe \
             --name ZelusLauncher \
             --app-version "$VERSION" \
             --vendor Zelus \
@@ -79,19 +79,20 @@ jobs:
             --dest build/dist \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
+            --win-dir-chooser \
+            --win-shortcut \
+            --win-menu \
             $ICON_FLAG
 
-      - name: Zip app-image
+      - name: Rename installer
         shell: bash
-        run: |
-          cd launcher/build/dist
-          7z a "ZelusLauncher-windows.zip" ZelusLauncher/
+        run: mv launcher/build/dist/ZelusLauncher-*.exe launcher/build/dist/ZelusLauncher-windows.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
-          path: launcher/build/dist/ZelusLauncher-windows.zip
+          name: windows-exe
+          path: launcher/build/dist/ZelusLauncher-windows.exe
 
   # ── macOS ─────────────────────────────────────────────────────────────────────
   build-macos:
@@ -226,7 +227,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/windows-zip/ZelusLauncher-windows.zip
+            artifacts/windows-exe/ZelusLauncher-windows.exe
             artifacts/macos-dmg/ZelusLauncher-mac.dmg
             artifacts/linux-deb/ZelusLauncher-linux.deb
           body: |
@@ -235,7 +236,7 @@ jobs:
             ### Download
             | Platform | File |
             |----------|------|
-            | Windows  | `ZelusLauncher-windows.zip` — extract and run `ZelusLauncher.exe` |
+            | Windows  | `ZelusLauncher-windows.exe` — run the installer |
             | macOS    | `ZelusLauncher-mac.dmg` — open and drag to Applications |
             | Linux    | `ZelusLauncher-linux.deb` — `sudo dpkg -i ZelusLauncher-linux.deb` |
 
