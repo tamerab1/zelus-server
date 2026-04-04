@@ -21,7 +21,7 @@
     "-Djava.net.preferIPv4Stack=true"
   ],
 
-  "main_class":  "client.Main",
+  "main_class":  "net.runelite.client.RuneLite",
   "game_server": "zelusrsps.com",
   "game_port":   43594
 }
