@@ -88,6 +88,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - certbot_webroot:/var/www/certbot:ro
       - certbot_certs:/etc/letsencrypt:ro
+      - ./patch-server:/server/patch:ro
     depends_on:
       - api
       - website
