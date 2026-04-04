@@ -69,7 +69,7 @@ public final class UpdateManager {
         }
 
         PatchManifest manifest = GSON.fromJson(resp.body(), PatchManifest.class);
-        if (manifest == null || manifest.client == null || manifest.cache == null) {
+        if (manifest == null || manifest.client == null) {
             throw new IOException("Manifest is malformed or incomplete.");
         }
         LOG.info("Manifest OK — client=" + manifest.client + "  cache=" + manifest.cache);

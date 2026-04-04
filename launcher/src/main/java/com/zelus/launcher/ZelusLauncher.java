@@ -20,7 +20,7 @@ public final class ZelusLauncher {
 
     // Remote manifest URL — change to your Cloudflare R2 / S3 bucket URL
     public static final String MANIFEST_URL =
-            System.getProperty("zelus.manifest", "https://patch.zelus.gg/manifest.json");
+            System.getProperty("zelus.manifest", "https://patch.zelusrsps.com/manifest.json");
 
     static final Logger LOG = Logger.getLogger("ZelusLauncher");
 
@@ -49,7 +49,7 @@ public final class ZelusLauncher {
 
                 frame.setStatus("Checking for updates...");
                 boolean needsClientUpdate = mgr.needsClientUpdate(manifest);
-                boolean needsCacheUpdate  = mgr.needsCacheUpdate(manifest);
+                boolean needsCacheUpdate  = manifest.cache != null && mgr.needsCacheUpdate(manifest);
 
                 if (needsCacheUpdate) {
                     frame.setStatus("Downloading game cache...");

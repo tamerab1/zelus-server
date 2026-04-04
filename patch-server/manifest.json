@@ -12,13 +12,7 @@
     "size_bytes": 44427227
   },
 
-  "cache": {
-    "version":    "1",
-    "filename":   "cache-1.zip",
-    "url":        "https://patch.zelusrsps.com/cache/cache-1.zip",
-    "sha256":     "REPLACE_WITH_SHA256_OF_CACHE_ZIP",
-    "size_bytes": 0
-  },
+  "cache": null,
 
   "jvm_args": [
     "-Xmx512m",
