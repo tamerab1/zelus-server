@@ -50,12 +50,13 @@ jobs:
       - name: Build fat JAR
         working-directory: launcher
         shell: bash
-        run: ./gradlew shadowJar -Pversion=$VERSION
+        run: ./gradlew shadowJar
 
       - name: Build app-image (portable, no WiX required)
         working-directory: launcher
         shell: bash
         run: |
+          JAR_NAME=$(ls build/libs/zelus-launcher-*.jar | head -1 | xargs basename)
           ICON_FLAG=""
           [ -f src/main/resources/zelus.ico ] && ICON_FLAG="--icon src/main/resources/zelus.ico"
           jpackage \
@@ -65,13 +66,11 @@ jobs:
             --vendor Zelus \
             --description "Zelus RSPS Launcher" \
             --input build/libs \
-            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-jar "$JAR_NAME" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
-            --win-menu \
-            --win-shortcut \
             $ICON_FLAG
 
       - name: Zip app-image
@@ -111,11 +110,12 @@ jobs:
 
       - name: Build fat JAR
         working-directory: launcher
-        run: ./gradlew shadowJar -Pversion=$VERSION
+        run: ./gradlew shadowJar
 
       - name: Package .dmg
         working-directory: launcher
         run: |
+          JAR_NAME=$(ls build/libs/zelus-launcher-*.jar | head -1 | xargs basename)
           ICON_FLAG=""
           [ -f src/main/resources/zelus.icns ] && ICON_FLAG="--icon src/main/resources/zelus.icns"
           jpackage \
@@ -125,7 +125,7 @@ jobs:
             --vendor Zelus \
             --description "Zelus RSPS Launcher" \
             --input build/libs \
-            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-jar "$JAR_NAME" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
             --java-options "-Xmx256m" \
@@ -167,11 +167,12 @@ jobs:
 
       - name: Build fat JAR
         working-directory: launcher
-        run: ./gradlew shadowJar -Pversion=$VERSION
+        run: ./gradlew shadowJar
 
       - name: Package .deb
         working-directory: launcher
         run: |
+          JAR_NAME=$(ls build/libs/zelus-launcher-*.jar | head -1 | xargs basename)
           ICON_FLAG=""
           [ -f src/main/resources/zelus.png ] && ICON_FLAG="--icon src/main/resources/zelus.png"
           jpackage \
@@ -181,7 +182,7 @@ jobs:
             --vendor Zelus \
             --description "Zelus RSPS Launcher" \
             --input build/libs \
-            --main-jar "zelus-launcher-${VERSION}.jar" \
+            --main-jar "$JAR_NAME" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
             --java-options "-Xmx256m" \
