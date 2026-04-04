@@ -50,12 +50,7 @@ jobs:
       - name: Build fat JAR
         working-directory: launcher
         shell: bash
-        run: ./gradlew shadowJar --info
-
-      - name: List build output
-        working-directory: launcher
-        shell: bash
-        run: find build/ -name "*.jar" 2>/dev/null || echo "No JARs found"
+        run: ./gradlew shadowJar
 
       - name: Build app-image (portable, no WiX required)
         working-directory: launcher
