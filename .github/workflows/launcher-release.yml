@@ -50,7 +50,15 @@ jobs:
       - name: Build fat JAR
         working-directory: launcher
         shell: bash
-        run: ./gradlew shadowJar
+        run: |
+          set +e
+          ./gradlew shadowJar --stacktrace 2>&1
+          GRADLE_EXIT=$?
+          set -e
+          echo "--- Gradle exit: $GRADLE_EXIT ---"
+          echo "--- build/libs contents ---"
+          ls -la build/libs/ 2>&1 || echo "(directory does not exist)"
+          exit $GRADLE_EXIT
 
       - name: Build app-image (portable, no WiX required)
         working-directory: launcher
