@@ -60,6 +60,16 @@ jobs:
           ls -la build/libs/ 2>&1 || echo "(directory does not exist)"
           exit $GRADLE_EXIT
 
+      - name: Generate Windows icon (.ico)
+        shell: bash
+        run: |
+          if [ -f launcher/src/main/resources/zelus.png ]; then
+            magick launcher/src/main/resources/zelus.png \
+              -define icon:auto-resize="256,128,96,64,48,32,16" \
+              launcher/src/main/resources/zelus.ico
+            echo "ICO generated"
+          fi
+
       - name: Build Windows installer (.exe)
         working-directory: launcher
         shell: bash
@@ -120,6 +130,23 @@ jobs:
       - name: Build fat JAR
         working-directory: launcher
         run: ./gradlew shadowJar
+
+      - name: Generate macOS icon (.icns)
+        run: |
+          if [ -f launcher/src/main/resources/zelus.png ]; then
+            mkdir -p zelus.iconset
+            sips -z 16 16   launcher/src/main/resources/zelus.png --out zelus.iconset/icon_16x16.png
+            sips -z 32 32   launcher/src/main/resources/zelus.png --out zelus.iconset/icon_16x16@2x.png
+            sips -z 32 32   launcher/src/main/resources/zelus.png --out zelus.iconset/icon_32x32.png
+            sips -z 64 64   launcher/src/main/resources/zelus.png --out zelus.iconset/icon_32x32@2x.png
+            sips -z 128 128 launcher/src/main/resources/zelus.png --out zelus.iconset/icon_128x128.png
+            sips -z 256 256 launcher/src/main/resources/zelus.png --out zelus.iconset/icon_128x128@2x.png
+            sips -z 256 256 launcher/src/main/resources/zelus.png --out zelus.iconset/icon_256x256.png
+            sips -z 512 512 launcher/src/main/resources/zelus.png --out zelus.iconset/icon_256x256@2x.png
+            sips -z 512 512 launcher/src/main/resources/zelus.png --out zelus.iconset/icon_512x512.png
+            iconutil -c icns zelus.iconset -o launcher/src/main/resources/zelus.icns
+            echo "ICNS generated"
+          fi
 
       - name: Package .dmg
         working-directory: launcher
