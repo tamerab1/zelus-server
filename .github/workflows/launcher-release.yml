@@ -50,7 +50,7 @@ jobs:
       - name: Build fat JAR
         working-directory: launcher
         shell: bash
-        run: ./gradlew shadowJar
+        run: ./gradlew shadowJar -Pversion=$VERSION
 
       - name: Build app-image (portable, no WiX required)
         working-directory: launcher
@@ -111,7 +111,7 @@ jobs:
 
       - name: Build fat JAR
         working-directory: launcher
-        run: ./gradlew shadowJar
+        run: ./gradlew shadowJar -Pversion=$VERSION
 
       - name: Package .dmg
         working-directory: launcher
@@ -167,7 +167,7 @@ jobs:
 
       - name: Build fat JAR
         working-directory: launcher
-        run: ./gradlew shadowJar
+        run: ./gradlew shadowJar -Pversion=$VERSION
 
       - name: Package .deb
         working-directory: launcher
