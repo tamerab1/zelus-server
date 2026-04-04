@@ -1,0 +1,6 @@
+[submodule "zelus-website-client"]
+	path = zelus-website-client
+	url = https://github.com/tamerab1/zelus-website-client.git
+[submodule "FR client"]
+	path = FR client
+	url = https://github.com/tamerab1/ZaryxClient.git
