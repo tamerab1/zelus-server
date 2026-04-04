@@ -5,7 +5,7 @@ worlds:
     port: 43594
     activity: "Zelus"
     private: false
-    visibility: DEVELOPER
+    visibility: PUBLIC
     verifyPasswords: true
     location: NETHERLANDS
     logback: "logback-dev"
