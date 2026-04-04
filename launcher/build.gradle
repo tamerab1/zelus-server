@@ -49,66 +49,101 @@ shadowJar {
     mergeServiceFiles()
 }
 
-// ── jpackage task ──────────────────────────────────────────────────────────────
-// jpackage ships with JDK 14+.  Run after ./gradlew shadowJar
-def launcherJar  = "${buildDir}/libs/zelus-launcher-${version}.jar"
-def jpackageBase = "${buildDir}/jpackage"
-def appVersion   = "${version}"
-def appVendor    = "Zelus"
-def appDesc      = "Zelus RSPS Launcher"
+// ── jpackage helpers ───────────────────────────────────────────────────────────
+ext {
+    jpackageBase = "${buildDir}/jpackage"
+    appVendor    = "Zelus"
+    appDesc      = "Zelus RSPS Launcher"
+}
 
-tasks.register('jpackage', Exec) {
-    dependsOn 'shadowJar'
-    group     = 'distribution'
-    description = 'Packages the launcher for the current OS using jpackage.'
+// Returns ['--icon', '<path>'] only when the icon file actually exists.
+def iconArgs(String path) {
+    return file(path).exists() ? ['--icon', path] : []
+}
 
-    def os   = System.getProperty('os.name').toLowerCase()
-    def type = os.contains('win') ? 'exe'
-             : os.contains('mac') ? 'dmg'
-             : 'deb'
-
-    def iconFlag = os.contains('win') ? ['--icon', 'src/main/resources/zelus.ico']
-                 : os.contains('mac') ? ['--icon', 'src/main/resources/zelus.icns']
-                 : ['--icon', 'src/main/resources/zelus.png']
-
-    commandLine(
+// Base args shared by all jpackage invocations.
+def baseArgs(String type, String dest) {
+    return [
         'jpackage',
         '--type',           type,
         '--name',           'ZelusLauncher',
-        '--app-version',    appVersion,
-        '--vendor',         appVendor,
-        '--description',    appDesc,
-        '--input',          "${buildDir}/libs",
-        '--main-jar',       "zelus-launcher-${version}.jar",
+        '--app-version',    project.version,
+        '--vendor',         project.ext.appVendor,
+        '--description',    project.ext.appDesc,
+        '--input',          "${project.buildDir}/libs",
+        '--main-jar',       "zelus-launcher-${project.version}.jar",
         '--main-class',     'com.zelus.launcher.ZelusLauncher',
-        '--dest',           jpackageBase,
+        '--dest',           dest,
         '--java-options',   '-Xmx256m',
         '--java-options',   '-Dfile.encoding=UTF-8',
-        *iconFlag,
-        // Windows-specific: add a start-menu shortcut
-        *(os.contains('win') ? ['--win-menu', '--win-shortcut'] : []),
-        // macOS-specific: hide dock icon while updating
-        *(os.contains('mac') ? ['--mac-package-name', 'ZelusLauncher'] : []),
-        // Linux-specific: desktop integration
-        *(os.contains('linux') ? ['--linux-shortcut', '--linux-menu-group', 'Games'] : []),
+    ]
+}
+
+// ── app-image (portable folder, no installer tool required) ───────────────────
+tasks.register('jpackageImage', Exec) {
+    dependsOn 'shadowJar'
+    group       = 'distribution'
+    description = 'Builds a portable app-image folder (no WiX/installer required).'
+
+    def os   = System.getProperty('os.name').toLowerCase()
+    def dest = "${jpackageBase}/image"
+    def icon = os.contains('win')  ? 'src/main/resources/zelus.ico'
+             : os.contains('mac')  ? 'src/main/resources/zelus.icns'
+             : 'src/main/resources/zelus.png'
+
+    commandLine(*baseArgs('app-image', dest), *iconArgs(icon))
+}
+
+// ── Windows EXE installer (requires WiX 3.x) ─────────────────────────────────
+tasks.register('jpackageWin', Exec) {
+    dependsOn 'shadowJar'
+    group       = 'distribution'
+    description = 'Builds a Windows EXE installer (requires WiX Toolset 3.x).'
+
+    commandLine(
+        *baseArgs('exe', "${jpackageBase}/win"),
+        *iconArgs('src/main/resources/zelus.ico'),
+        '--win-menu',
+        '--win-shortcut',
+        '--win-dir-chooser',
     )
 }
 
-// ── AppImage task (Linux CI) ────────────────────────────────────────────────
-tasks.register('appimage', Exec) {
+// ── macOS DMG installer ────────────────────────────────────────────────────────
+tasks.register('jpackageMac', Exec) {
     dependsOn 'shadowJar'
-    group     = 'distribution'
-    description = 'Builds a portable AppImage (Linux only, requires appimagetool).'
+    group       = 'distribution'
+    description = 'Builds a macOS DMG installer (run on macOS only).'
 
     commandLine(
-        'jpackage',
-        '--type',         'app-image',
-        '--name',         'ZelusLauncher',
-        '--app-version',  appVersion,
-        '--input',        "${buildDir}/libs",
-        '--main-jar',     "zelus-launcher-${version}.jar",
-        '--main-class',   'com.zelus.launcher.ZelusLauncher',
-        '--dest',         "${jpackageBase}/appimage",
-        '--java-options', '-Xmx256m',
+        *baseArgs('dmg', "${jpackageBase}/mac"),
+        *iconArgs('src/main/resources/zelus.icns'),
+        '--mac-package-name', 'ZelusLauncher',
     )
+}
+
+// ── Linux DEB installer ────────────────────────────────────────────────────────
+tasks.register('jpackageLinux', Exec) {
+    dependsOn 'shadowJar'
+    group       = 'distribution'
+    description = 'Builds a Linux DEB installer (run on Linux only).'
+
+    commandLine(
+        *baseArgs('deb', "${jpackageBase}/linux"),
+        *iconArgs('src/main/resources/zelus.png'),
+        '--linux-shortcut',
+        '--linux-menu-group', 'Games',
+    )
+}
+
+// ── Convenience alias: build installer for current OS ─────────────────────────
+tasks.register('jpackage') {
+    dependsOn 'shadowJar'
+    group       = 'distribution'
+    description = 'Alias: builds the installer for the current OS.'
+
+    def os = System.getProperty('os.name').toLowerCase()
+    if      (os.contains('win'))  dependsOn 'jpackageWin'
+    else if (os.contains('mac'))  dependsOn 'jpackageMac'
+    else                          dependsOn 'jpackageLinux'
 }

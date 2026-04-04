@@ -15,8 +15,8 @@
   "cache": null,
 
   "jvm_args": [
-    "-Xmx512m",
-    "-Xms256m",
+    "-Xmx1G",
+    "-Xms512m",
     "-Dfile.encoding=UTF-8",
     "-Djava.net.preferIPv4Stack=true"
   ],

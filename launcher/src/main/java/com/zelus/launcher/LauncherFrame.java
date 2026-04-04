@@ -4,62 +4,66 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
- * The main launcher window.
- *
- * Layout:
- *   ┌────────────────────────────────────────┐
- *   │        [ZELUS logo / banner]           │  ← banner panel (dark bg)
- *   │                                        │
- *   ├────────────────────────────────────────┤
- *   │  Status: Checking for updates...       │  ← status label
- *   │  [████████████████░░░░░░░░░░░░] 64%   │  ← progress bar
- *   │                          [PLAY ▶]      │  ← play button (hidden during update)
- *   └────────────────────────────────────────┘
+ * The main launcher window with background image support.
  */
 public final class LauncherFrame extends JFrame {
 
-    private static final Color BG_DARK    = new Color(0x0D, 0x0D, 0x0D);
-    private static final Color BG_PANEL   = new Color(0x14, 0x10, 0x0C);
-    private static final Color GOLD       = new Color(0xD4, 0xAF, 0x37);
-    private static final Color TEXT_DIM   = new Color(0x66, 0x66, 0x66);
-    private static final Color ERROR_RED  = new Color(0xEF, 0x44, 0x44);
+    private static final Color GOLD      = new Color(0xD4, 0xAF, 0x37);
+    private static final Color TEXT_DIM  = new Color(0xAA, 0xAA, 0xAA);
+    private static final Color ERROR_RED = new Color(0xEF, 0x44, 0x44);
+    private static final Color BG_BOTTOM = new Color(0x0A, 0x08, 0x05, 220);
 
-    private final JLabel        statusLabel;
-    private final JProgressBar  progressBar;
-    private final JButton       playButton;
-    private final JLabel        errorLabel;
+    private final JLabel       statusLabel;
+    private final JProgressBar progressBar;
+    private final JButton      playButton;
+    private final JLabel       errorLabel;
 
     public LauncherFrame() {
         super("Zelus Launcher");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
-        setBackground(BG_DARK);
 
-        // ── Banner area ───────────────────────────────────────────────────────
-        JPanel banner = new JPanel();
-        banner.setBackground(BG_DARK);
-        banner.setPreferredSize(new Dimension(640, 200));
-        banner.setLayout(new GridBagLayout());
+        // ── Load background image ─────────────────────────────────────────────
+        BufferedImage bgImage = null;
+        try {
+            var stream = getClass().getResourceAsStream("/background.jpg");
+            if (stream != null) bgImage = ImageIO.read(stream);
+        } catch (IOException ignored) {}
+        final BufferedImage bg = bgImage;
 
-        JLabel title = new JLabel("ZELUS");
-        title.setFont(new Font("Dialog", Font.BOLD, 52));
-        title.setForeground(GOLD);
-        banner.add(title);
-
-        JLabel subtitle = new JLabel("PRIVATE SERVER");
-        subtitle.setFont(new Font("Dialog", Font.PLAIN, 12));
-        subtitle.setForeground(TEXT_DIM);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridy = 1;
-        gbc.insets = new Insets(4, 0, 0, 0);
-        banner.add(subtitle, gbc);
+        // ── Banner panel with background image ────────────────────────────────
+        JPanel banner = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) {
+                    g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    g.setColor(new Color(0x0D, 0x0D, 0x0D));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        banner.setOpaque(false);
+        banner.setPreferredSize(new Dimension(800, 420));
 
         // ── Bottom panel ──────────────────────────────────────────────────────
-        JPanel bottom = new JPanel(new BorderLayout(0, 8));
-        bottom.setBackground(BG_PANEL);
-        bottom.setBorder(new EmptyBorder(16, 24, 20, 24));
+        JPanel bottom = new JPanel(new BorderLayout(0, 8)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(BG_BOTTOM);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+            }
+        };
+        bottom.setOpaque(false);
+        bottom.setBorder(new EmptyBorder(14, 24, 18, 24));
 
         // Status label
         statusLabel = new JLabel("Initializing...");
@@ -72,22 +76,22 @@ public final class LauncherFrame extends JFrame {
         progressBar.setForeground(GOLD);
         progressBar.setBackground(new Color(0x1E, 0x1A, 0x12));
         progressBar.setBorderPainted(false);
-        progressBar.setPreferredSize(new Dimension(0, 6));
+        progressBar.setPreferredSize(new Dimension(0, 5));
 
-        // Error label (hidden by default)
+        // Error label
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(ERROR_RED);
         errorLabel.setFont(new Font("Dialog", Font.PLAIN, 11));
         errorLabel.setVisible(false);
 
-        // Play button (hidden during update, shown when ready)
+        // Play button
         playButton = new JButton("PLAY");
         playButton.setFont(new Font("Dialog", Font.BOLD, 13));
         playButton.setForeground(Color.BLACK);
         playButton.setBackground(GOLD);
         playButton.setFocusPainted(false);
         playButton.setBorderPainted(false);
-        playButton.setPreferredSize(new Dimension(120, 36));
+        playButton.setPreferredSize(new Dimension(120, 34));
         playButton.setVisible(false);
         playButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -109,33 +113,35 @@ public final class LauncherFrame extends JFrame {
         bottom.add(btnRow,      BorderLayout.SOUTH);
 
         // ── Assemble ──────────────────────────────────────────────────────────
-        JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(BG_DARK);
+        JPanel root = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                if (bg != null) {
+                    g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    g.setColor(new Color(0x0D, 0x0D, 0x0D));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        root.setOpaque(false);
         root.add(banner, BorderLayout.CENTER);
         root.add(bottom, BorderLayout.SOUTH);
 
         setContentPane(root);
         pack();
-        setSize(640, 340);
-        setLocationRelativeTo(null);  // center on screen
+        setSize(800, 500);
+        setLocationRelativeTo(null);
     }
 
-    // ── Public API (called from UpdateManager / ZelusLauncher) ───────────────
-
-    /** Updates the status text (call from any thread). */
     public void setStatus(String text) {
         SwingUtilities.invokeLater(() -> statusLabel.setText(text));
     }
 
-    /** Sets the progress bar value 0–100 (call from any thread). */
     public void setProgress(int pct) {
-        SwingUtilities.invokeLater(() -> progressBar.setValue(Math.clamp(pct, 0, 100)));
+        SwingUtilities.invokeLater(() -> progressBar.setValue(Math.max(0, Math.min(100, pct))));
     }
 
-    /**
-     * Shows an error message and a retry-or-exit dialog.
-     * Call from any thread.
-     */
     public void showError(String message) {
         SwingUtilities.invokeLater(() -> {
             errorLabel.setText(message);
@@ -155,16 +161,11 @@ public final class LauncherFrame extends JFrame {
             if (choice == JOptionPane.NO_OPTION) {
                 System.exit(1);
             } else {
-                // Signal retry — ZelusLauncher will detect this and restart the pipeline
-                System.exit(0);   // simplest: just restart the process
+                System.exit(0);
             }
         });
     }
 
-    /**
-     * Reveals the PLAY button and wires up the given action.
-     * Used when the client is already up-to-date and no download is needed.
-     */
     public void showPlayButton(Runnable onPlay) {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(100);

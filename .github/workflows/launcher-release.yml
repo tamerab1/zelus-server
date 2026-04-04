@@ -2,6 +2,8 @@
 # Triggers on any tag like v1.0.0
 # Builds native packages on Windows, macOS, and Linux runners in parallel.
 # Uploads all artifacts to the GitHub Release.
+#
+# To release: git tag v1.0.1 && git push origin v1.0.1
 
 name: Launcher Release
 
@@ -9,114 +11,159 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
 
 permissions:
   contents: write   # needed to create releases and upload assets
 
 jobs:
 
-  # ── Windows .exe ─────────────────────────────────────────────────────────────
+  # ── Windows ──────────────────────────────────────────────────────────────────
   build-windows:
     name: Package Windows (.exe)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+          fi
 
       - name: Build fat JAR
         working-directory: launcher
+        shell: bash
         run: ./gradlew shadowJar
 
-      - name: Package with jpackage
+      - name: Build app-image (portable, no WiX required)
         working-directory: launcher
         shell: bash
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          ICON_FLAG=""
+          [ -f src/main/resources/zelus.ico ] && ICON_FLAG="--icon src/main/resources/zelus.ico"
           jpackage \
-            --type exe \
+            --type app-image \
             --name ZelusLauncher \
             --app-version "$VERSION" \
             --vendor Zelus \
+            --description "Zelus RSPS Launcher" \
             --input build/libs \
             --main-jar "zelus-launcher-${VERSION}.jar" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
-            --icon src/main/resources/zelus.ico \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
             --win-menu \
             --win-shortcut \
-            --win-dir-chooser
+            $ICON_FLAG
+
+      - name: Zip app-image
+        shell: bash
+        run: |
+          cd launcher/build/dist
+          7z a "ZelusLauncher-${VERSION}-windows.zip" ZelusLauncher/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-exe
-          path: launcher/build/dist/*.exe
+          name: windows-zip
+          path: launcher/build/dist/ZelusLauncher-*-windows.zip
 
-  # ── macOS .dmg ───────────────────────────────────────────────────────────────
+  # ── macOS ─────────────────────────────────────────────────────────────────────
   build-macos:
     name: Package macOS (.dmg)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
+
+      - name: Resolve version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+          fi
 
       - name: Build fat JAR
         working-directory: launcher
         run: ./gradlew shadowJar
 
-      - name: Package with jpackage
+      - name: Package .dmg
         working-directory: launcher
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          ICON_FLAG=""
+          [ -f src/main/resources/zelus.icns ] && ICON_FLAG="--icon src/main/resources/zelus.icns"
           jpackage \
             --type dmg \
             --name ZelusLauncher \
             --app-version "$VERSION" \
             --vendor Zelus \
+            --description "Zelus RSPS Launcher" \
             --input build/libs \
             --main-jar "zelus-launcher-${VERSION}.jar" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
-            --icon src/main/resources/zelus.icns \
             --java-options "-Xmx256m" \
-            --mac-package-name ZelusLauncher
+            --java-options "-Dfile.encoding=UTF-8" \
+            --mac-package-name ZelusLauncher \
+            $ICON_FLAG
+
+      - name: Rename DMG
+        run: mv launcher/build/dist/ZelusLauncher-*.dmg launcher/build/dist/ZelusLauncher-${VERSION}-mac.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
-          path: launcher/build/dist/*.dmg
+          path: launcher/build/dist/ZelusLauncher-*-mac.dmg
 
-  # ── Linux .deb + AppImage ────────────────────────────────────────────────────
+  # ── Linux ─────────────────────────────────────────────────────────────────────
   build-linux:
-    name: Package Linux (.deb + AppImage)
+    name: Package Linux (.deb)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
 
-      - name: Install appimagetool
+      - name: Resolve version
         run: |
-          wget -q -O /usr/local/bin/appimagetool \
-            https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage
-          chmod +x /usr/local/bin/appimagetool
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+          fi
 
       - name: Build fat JAR
         working-directory: launcher
@@ -125,48 +172,31 @@ jobs:
       - name: Package .deb
         working-directory: launcher
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          ICON_FLAG=""
+          [ -f src/main/resources/zelus.png ] && ICON_FLAG="--icon src/main/resources/zelus.png"
           jpackage \
             --type deb \
             --name zelus-launcher \
             --app-version "$VERSION" \
             --vendor Zelus \
+            --description "Zelus RSPS Launcher" \
             --input build/libs \
             --main-jar "zelus-launcher-${VERSION}.jar" \
             --main-class com.zelus.launcher.ZelusLauncher \
             --dest build/dist \
-            --icon src/main/resources/zelus.png \
             --java-options "-Xmx256m" \
+            --java-options "-Dfile.encoding=UTF-8" \
             --linux-shortcut \
-            --linux-menu-group Games
+            --linux-menu-group Games \
+            $ICON_FLAG
 
-      - name: Package AppImage
-        working-directory: launcher
-        run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          jpackage \
-            --type app-image \
-            --name ZelusLauncher \
-            --app-version "$VERSION" \
-            --input build/libs \
-            --main-jar "zelus-launcher-${VERSION}.jar" \
-            --main-class com.zelus.launcher.ZelusLauncher \
-            --dest build/appimage-stage \
-            --icon src/main/resources/zelus.png \
-            --java-options "-Xmx256m"
-          ARCH=x86_64 appimagetool \
-            build/appimage-stage/ZelusLauncher \
-            "build/dist/ZelusLauncher-${VERSION}-x86_64.AppImage"
-
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages
-          path: |
-            launcher/build/dist/*.deb
-            launcher/build/dist/*.AppImage
+          name: linux-deb
+          path: launcher/build/dist/*.deb
 
-  # ── GitHub Release ────────────────────────────────────────────────────────────
+  # ── GitHub Release ─────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
     needs: [build-windows, build-macos, build-linux]
@@ -184,23 +214,17 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/windows-exe/*.exe
+            artifacts/windows-zip/*.zip
             artifacts/macos-dmg/*.dmg
-            artifacts/linux-packages/*.deb
-            artifacts/linux-packages/*.AppImage
+            artifacts/linux-deb/*.deb
           body: |
             ## Zelus Launcher ${{ github.ref_name }}
 
             ### Download
             | Platform | File |
             |----------|------|
-            | Windows  | `ZelusLauncher-*.exe` |
-            | macOS    | `ZelusLauncher-*.dmg` |
-            | Linux (Debian/Ubuntu) | `zelus-launcher_*.deb` |
-            | Linux (Portable)      | `ZelusLauncher-*-x86_64.AppImage` |
+            | Windows  | `ZelusLauncher-*-windows.zip` — extract and run `ZelusLauncher.exe` |
+            | macOS    | `ZelusLauncher-*-mac.dmg` — open and drag to Applications |
+            | Linux    | `zelus-launcher_*.deb` — `sudo dpkg -i zelus-launcher_*.deb` |
 
-            ### Installation
-            - **Windows**: Run the `.exe` installer. A shortcut is added to the Start Menu.
-            - **macOS**: Open the `.dmg`, drag to Applications.
-            - **Linux (.deb)**: `sudo dpkg -i zelus-launcher_*.deb`
-            - **Linux (AppImage)**: `chmod +x *.AppImage && ./*.AppImage`
+            The launcher auto-updates the game client on every launch.
