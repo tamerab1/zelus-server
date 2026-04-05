@@ -2716,12 +2716,13 @@ public final class GameCommands {
             Donation.run(p);
         });
         new Command(PlayerPrivilege.PLAYER, new String[]{"store", "donate"}, (player, args) -> {
-            String websiteURL = "https://www.Defiance.org/store";
-            player.getPacketDispatcher().sendURL(websiteURL);
+            player.getPacketDispatcher().sendURL(GameConstants.SERVER_STORE_URL);
         });
-        new Command(PlayerPrivilege.PLAYER, "vote", "Visit the vote website for Defiance.", (player, args) -> {
-            String websiteURL = "https://www.Defiance.org/vote";
-            player.getPacketDispatcher().sendURL(websiteURL);
+        new Command(PlayerPrivilege.PLAYER, "vote", "Visit the vote page for Zelus.", (player, args) -> {
+            player.getPacketDispatcher().sendURL(GameConstants.SERVER_VOTE_URL);
+        });
+        new Command(PlayerPrivilege.PLAYER, "website", "Visit the Zelus website.", (player, args) -> {
+            player.getPacketDispatcher().sendURL(GameConstants.SERVER_WEBSITE_URL);
         });
         new Command(PlayerPrivilege.PLAYER, new String[]{"rules"}, (p, args) -> {
             p.getPacketDispatcher().sendURL(GameConstants.SERVER_RULES_URL);
@@ -2736,10 +2737,10 @@ public final class GameCommands {
             p.getPacketDispatcher().sendURL(GameConstants.DISCORD_INVITE);
         });
         new Command(PlayerPrivilege.PLAYER, "2fa", (p, args) -> {
-            p.getPacketDispatcher().sendURL("https://Defiance.org/account");
+            p.getPacketDispatcher().sendURL(GameConstants.SERVER_ACCOUNT_URL);
         });
         new Command(PlayerPrivilege.PLAYER, "youtube", (p, args) -> {
-            p.getPacketDispatcher().sendURL("https://www.Defiance.org");
+            p.getPacketDispatcher().sendURL(GameConstants.SERVER_WEBSITE_URL);
         });
         new Command(PlayerPrivilege.PLAYER, "yell", "Sends a global message across the game.", (p, args) -> {
             if (SanctionPlayerExtKt.isMuted(p)) {

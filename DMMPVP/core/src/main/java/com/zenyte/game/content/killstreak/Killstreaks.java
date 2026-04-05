@@ -66,7 +66,13 @@ public class Killstreaks {
 
         announceShutdown(attacker, victim);
         resetKillstreak(victim, true);
-        announceKillstreak(attacker, attackerCurrentStreak + 1);
+
+        final int newStreak = attackerCurrentStreak + 1;
+        announceKillstreak(attacker, newStreak);
+
+        // Write to livefeed.json so the website shows this kill in real time.
+        LiveFeedWriter.appendEvent("pvp_kill",
+                attacker.getName() + " slew " + victim.getName() + " in the Wilderness.");
     }
 
 
@@ -94,6 +100,10 @@ public class Killstreaks {
                     + " has a killstreak of " + newKillstreak +
                     " and can be shutdown for " + getKillstreakBoost(newKillstreak)
                     + " bonus Blood money!</col>");
+
+            // Write killstreak milestone to livefeed.json for the website widget.
+            LiveFeedWriter.appendEvent("killstreak",
+                    player.getName() + " is on a " + newKillstreak + " killstreak in the Wilderness!");
         }
     }
 

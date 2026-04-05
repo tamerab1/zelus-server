@@ -57,6 +57,11 @@ import com.zenyte.game.world.entity.player.login.LoginManager;
 import com.zenyte.game.world.entity.player.privilege.PlayerPrivilege;
 import com.zenyte.game.world.flooritem.FloorItem;
 import com.zenyte.game.world.flooritem.GlobalItem;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import com.zenyte.game.world.object.AttachedObject;
 import com.zenyte.game.world.object.WorldObject;
 import com.zenyte.game.world.region.*;
@@ -354,6 +359,19 @@ public final class World {
     public static void init() {
         initGrandExchangeSavingTask();
         initHelpfulTipTask();
+        initOnlineCountTask();
+    }
+
+    private static void initOnlineCountTask() {
+        CoresManager.getServiceProvider().scheduleRepeatingTask(() -> {
+            try {
+                final int count = getPlayers().size();
+                final Path file = Paths.get("data/characters/online_count.json");
+                Files.writeString(file, "{\"online\":" + count + "}", StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (final IOException e) {
+                log.error("Failed to write online_count.json", e);
+            }
+        }, 10, 30);
     }
 
     public static void initTasks() {

@@ -270,7 +270,8 @@ public final class GameNoticeboardInterface extends Interface {
         bind("Website", player -> player.getPacketDispatcher().sendURL(GameConstants.SERVER_WEBSITE_URL));
         bind("Forums", player -> player.getPacketDispatcher().sendURL(GameConstants.SERVER_FORUMS_URL));
         bind("Discord", player -> player.getPacketDispatcher().sendURL(GameConstants.DISCORD_INVITE));
-        bind("Store", GameInterface.CREDIT_STORE::open);
+        bind("Vote", player -> player.getPacketDispatcher().sendURL(GameConstants.SERVER_VOTE_URL));
+        bind("Store", player -> player.getPacketDispatcher().sendURL(GameConstants.SERVER_STORE_URL));
         bind("Toggles", player -> {
             if(player.isMember()) {
                 DonationToggle.openInterface(player);

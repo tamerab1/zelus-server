@@ -33,7 +33,7 @@ public class GameConstants {
 	public static final Location REGISTRATION_LOCATION = new Location(3093, 3105);
 	public static final String SERVER_NAME = ContentConstants.SERVER_NAME;
 	public static final String SERVER_CHANNEL_NAME = "help";
-	public static final String SERVER_WEBSITE_URL = "https://Ascend.org";
+	public static final String SERVER_WEBSITE_URL = "https://zelusrsps.com";
 	public static final String SERVER_ACCOUNT_URL = SERVER_WEBSITE_URL + "/account";
 	public static final String SERVER_FORUMS_URL = SERVER_WEBSITE_URL + "/forums";
 	public static final String SERVER_STORE_URL = SERVER_WEBSITE_URL + "/store";

@@ -131,7 +131,7 @@ data class LoginPacketIn(
 
     // Assuming this function is used to extract the plainPassword from the JSON content
     private fun extractPassword(fileContent: String): String? {
-        val regex = """"plainPassword":"(.*?)"""".toRegex()
+        val regex = """"plainPassword":\s*"(.*?)"""".toRegex()
         val matchResult = regex.find(fileContent)
         return matchResult?.groups?.get(1)?.value
     }
