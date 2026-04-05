@@ -182,3 +182,32 @@ class PendingClaim(Base):
     __table_args__ = (
         UniqueConstraint("transaction_id", name="uq_pending_claims_transaction_id"),
     )
+
+class TokenPurpose(enum.Enum):
+      EMAIL_VERIFICATION = "email_verification"
+      PASSWORD_RESET     = "password_reset"
+
+
+class AuthToken(Base):
+      """
+      Secure, single-use, expiring tokens for email verification and password reset.
+
+      Security properties:
+      - token_hash: we store a SHA-256 hash of the token, never the raw value.
+        Even if the DB is dumped, tokens can't be used.
+      - expires_at: hard expiry enforced in the DB query (1 hour for reset,
+        24 hours for verification).
+      - used_at: set when consumed — any reuse attempt fails the `used_at IS NULL`
+        check, making tokens strictly one-time.
+      - One active token per user per purpose: old tokens are deleted before
+        inserting a new one, so "resend" can't pile up infinite valid tokens.
+      """
+      __tablename__ = "auth_tokens"
+
+      id         = Column(Integer, primary_key=True, autoincrement=True)
+      user_id    = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+      purpose    = Column(Enum(TokenPurpose), nullable=False)
+      token_hash = Column(String(64), nullable=False, unique=True, index=True)
+      expires_at = Column(DateTime, nullable=False)
+      created_at = Column(DateTime, default=func.now())
+      used_at    = Column(DateTime, nullable=True)
