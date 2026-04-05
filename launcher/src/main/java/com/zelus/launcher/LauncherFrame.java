@@ -142,7 +142,7 @@ public final class LauncherFrame extends JFrame {
         SwingUtilities.invokeLater(() -> progressBar.setValue(Math.max(0, Math.min(100, pct))));
     }
 
-    public void showError(String message) {
+    public void showError(String message, Runnable onRetry) {
         SwingUtilities.invokeLater(() -> {
             errorLabel.setText(message);
             errorLabel.setVisible(true);
@@ -158,10 +158,13 @@ public final class LauncherFrame extends JFrame {
                 new String[]{"Retry", "Exit"},
                 "Retry"
             );
-            if (choice == JOptionPane.NO_OPTION) {
-                System.exit(1);
+            if (choice == JOptionPane.YES_OPTION) {
+                errorLabel.setVisible(false);
+                progressBar.setValue(0);
+                statusLabel.setText("Retrying...");
+                if (onRetry != null) onRetry.run();
             } else {
-                System.exit(0);
+                System.exit(1);
             }
         });
     }

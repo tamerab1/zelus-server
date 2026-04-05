@@ -75,7 +75,8 @@ public final class ZelusLauncher {
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, "Launch failed", ex);
                 SwingUtilities.invokeLater(() ->
-                    frame.showError("Launch failed: " + ex.getMessage())
+                    frame.showError(ex.getMessage() != null ? ex.getMessage() : ex.toString(),
+                                    () -> startUpdatePipeline(frame))
                 );
             }
         }, "launcher-worker");

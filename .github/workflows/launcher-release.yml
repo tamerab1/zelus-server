@@ -32,11 +32,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Resolve version
         shell: bash
@@ -89,6 +89,7 @@ jobs:
             --dest build/dist \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
+            --jlink-options "--strip-debug --no-man-pages --no-header-files" \
             --win-dir-chooser \
             --win-shortcut \
             --win-menu \
@@ -113,11 +114,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Resolve version
         run: |
@@ -166,6 +167,7 @@ jobs:
             --dest build/dist \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
+            --jlink-options "--strip-debug --no-man-pages --no-header-files" \
             --mac-package-name ZelusLauncher \
             $ICON_FLAG
 
@@ -187,11 +189,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Resolve version
         run: |
@@ -223,6 +225,7 @@ jobs:
             --dest build/dist \
             --java-options "-Xmx256m" \
             --java-options "-Dfile.encoding=UTF-8" \
+            --jlink-options "--strip-debug --no-man-pages --no-header-files" \
             --linux-shortcut \
             --linux-menu-group Games \
             $ICON_FLAG

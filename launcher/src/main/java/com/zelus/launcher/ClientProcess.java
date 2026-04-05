@@ -78,7 +78,22 @@ public final class ClientProcess {
 
         ProcessBuilder pb = new ProcessBuilder(cmd);
         pb.directory(dataDir.toFile());
-        pb.inheritIO();   // forward stdout/stderr to the launcher's console
+
+        // Redirect client stdout/stderr to a log file so errors are visible
+        // even when the launcher has no console window (jpackage install).
+        try {
+            java.nio.file.Path logsDir = dataDir.resolve("logs");
+            Files.createDirectories(logsDir);
+            String timestamp = java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+            java.io.File logFile = logsDir.resolve("client-" + timestamp + ".log").toFile();
+            pb.redirectErrorStream(true);
+            pb.redirectOutput(logFile);
+            LOG.info("Client output → " + logFile.getAbsolutePath());
+        } catch (Exception e) {
+            LOG.warning("Could not create log file, falling back to inheritIO: " + e.getMessage());
+            pb.inheritIO();
+        }
 
         return pb.start();
     }
@@ -91,34 +106,57 @@ public final class ClientProcess {
      * Priority:
      *   1. The JRE bundled by jpackage into the launcher's own install directory.
      *   2. The running JVM's java.home (the JRE used to launch this launcher).
-     *   3. "java" on the system PATH.
+     *   3. JAVA_HOME environment variable.
+     *   4. "java" on the system PATH (last resort).
      *
-     * This ensures that even if the user has no global Java installed, the bundled
-     * JRE from jpackage is used to launch the client.
+     * On Windows, javaw.exe is preferred over java.exe to avoid a black console
+     * window appearing behind the game client.
      */
     private static String resolveJavaExecutable() {
-        String exeName = (OSUtils.getCurrentOS() == OSUtils.OS.WINDOWS) ? "java.exe" : "java";
+        boolean isWindows = OSUtils.getCurrentOS() == OSUtils.OS.WINDOWS;
+        // javaw.exe on Windows: same as java.exe but no console window
+        String[] candidates = isWindows ? new String[]{"javaw.exe", "java.exe"} : new String[]{"java"};
 
-        // 1. jpackage puts the bundled JRE at <install>/runtime/bin/java
+        // 1. jpackage puts the bundled JRE at <install>/runtime/bin/
         Path selfDir = selfInstallDirectory();
         if (selfDir != null) {
-            Path bundled = selfDir.resolve("runtime").resolve("bin").resolve(exeName);
-            if (Files.isExecutable(bundled)) {
-                return bundled.toAbsolutePath().toString();
+            Path binDir = selfDir.resolve("runtime").resolve("bin");
+            for (String name : candidates) {
+                Path bundled = binDir.resolve(name);
+                if (Files.isExecutable(bundled)) {
+                    LOG.info("Using bundled JRE: " + bundled);
+                    return bundled.toAbsolutePath().toString();
+                }
             }
         }
 
         // 2. java.home of the currently-running JVM
         String javaHome = System.getProperty("java.home");
         if (javaHome != null) {
-            Path fromHome = Path.of(javaHome, "bin", exeName);
-            if (Files.isExecutable(fromHome)) {
-                return fromHome.toAbsolutePath().toString();
+            for (String name : candidates) {
+                Path fromHome = Path.of(javaHome, "bin", name);
+                if (Files.isExecutable(fromHome)) {
+                    LOG.info("Using java.home JRE: " + fromHome);
+                    return fromHome.toAbsolutePath().toString();
+                }
             }
         }
 
-        // 3. Rely on PATH
-        return "java";
+        // 3. JAVA_HOME environment variable
+        String javaHomeEnv = System.getenv("JAVA_HOME");
+        if (javaHomeEnv != null && !javaHomeEnv.isBlank()) {
+            for (String name : candidates) {
+                Path fromEnv = Path.of(javaHomeEnv, "bin", name);
+                if (Files.isExecutable(fromEnv)) {
+                    LOG.info("Using JAVA_HOME: " + fromEnv);
+                    return fromEnv.toAbsolutePath().toString();
+                }
+            }
+        }
+
+        // 4. Rely on PATH
+        LOG.warning("Could not find bundled java — falling back to PATH. Client may fail to launch.");
+        return isWindows ? "javaw.exe" : "java";
     }
 
     /**

@@ -14,7 +14,7 @@ version = '1.0.0'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -76,6 +76,9 @@ def baseArgs(String type, String dest) {
         '--dest',           dest,
         '--java-options',   '-Xmx256m',
         '--java-options',   '-Dfile.encoding=UTF-8',
+        // Keep java.exe/javaw.exe in the bundled JRE so ClientProcess can use it
+        // to launch the game client. jpackage strips native commands by default.
+        '--jlink-options',  '--strip-debug --no-man-pages --no-header-files',
     ]
 }
 
