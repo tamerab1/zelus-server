@@ -41,6 +41,9 @@ services:
       # Override DB URL to use the compose service hostname
       DATABASE_URL: postgresql://${POSTGRES_USER:-zelus_web}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-zelus_db}
       GAME_DB_HOST: ${GAME_DB_HOST:-localhost}
+      CHARACTERS_DIR: /server/data/characters
+    volumes:
+      - game_characters:/server/data/characters:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -151,7 +154,7 @@ volumes:
   certbot_certs:
     driver: local
   game_characters:
-    driver: local
+    external: true
 
 networks:
   zelus_internal:

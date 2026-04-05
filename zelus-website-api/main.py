@@ -1,3 +1,4 @@
+import logging
 import os, json, math, secrets, smtplib
 from dotenv import load_dotenv
 load_dotenv()  # loads .env file if present (no-op in production when env vars are injected)
@@ -9,9 +10,10 @@ from typing import Optional
 
 import bcrypt
 import requests as _requests  # sync HTTP for Turnstile verify
+import stripe as _stripe
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -22,6 +24,16 @@ from sqlalchemy.orm import Session
 import models
 from database import engine, get_db
 from game_database import get_game_db, GameUser, GameUserSkillStat
+from routers import checkout as checkout_router_module
+from routers import webhooks as webhooks_router_module
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger("zelus.main")
 
 # ── Environment config ────────────────────────────────────────────────────────
 _TURNSTILE_SECRET   = os.getenv("TURNSTILE_SECRET_KEY", "")
@@ -123,8 +135,11 @@ _SKILL_ORDER = [
     'runecrafting_xp', 'hunter_xp', 'construction_xp',
 ]
 
-# Path to DMMPVP character save files — relative to this file's location
-_CHARACTERS_DIR = Path(__file__).parent.parent / "DMMPVP" / "data" / "characters"
+# Path to DMMPVP character save files.
+# Override with CHARACTERS_DIR env var in Docker (set in docker-compose.yml).
+_CHARACTERS_DIR = Path(os.getenv("CHARACTERS_DIR") or "") or (
+    Path(__file__).parent.parent / "DMMPVP" / "data" / "characters"
+)
 
 def _xp_to_level(xp: float) -> int:
     """Standard OSRS XP → level formula."""
@@ -192,7 +207,7 @@ def _read_character_files(limit: int = 200) -> list[dict] | None:
             continue
     return rows
 
-# Create tables if they don't exist
+# Create all tables (existing + new: transactions, pending_claims)
 models.Base.metadata.create_all(bind=engine)
 
 # Add any missing skill columns to user_skill_stats (safe to run every startup)
@@ -224,6 +239,14 @@ with engine.connect() as _conn:
             _conn.execute(__import__("sqlalchemy").text(_stmt))
         except Exception:
             pass
+    # Security: ensure pending_claims.transaction_id is unique (anti-replay / race condition guard)
+    try:
+        _conn.execute(__import__("sqlalchemy").text(
+            "ALTER TABLE pending_claims ADD CONSTRAINT uq_pending_claims_transaction_id "
+            "UNIQUE (transaction_id)"
+        ))
+    except Exception:
+        pass  # constraint already exists — safe to ignore
     _conn.commit()
 
 limiter = Limiter(key_func=get_remote_address)
@@ -238,6 +261,31 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
+
+# ── Payment routers ────────────────────────────────────────────────────────────
+app.include_router(checkout_router_module.router)
+app.include_router(webhooks_router_module.router)
+
+# ── Payment-specific exception handlers ───────────────────────────────────────
+@app.exception_handler(_stripe.error.StripeError)
+async def stripe_error_handler(request: Request, exc: _stripe.error.StripeError):
+    log.error("Unhandled Stripe error: %s", exc)
+    return JSONResponse(
+        status_code=502,
+        content={"detail": exc.user_message or "A payment processing error occurred."},
+    )
+
+@app.exception_handler(Exception)
+async def generic_error_handler(request: Request, exc: Exception):
+    # Only catch truly unexpected exceptions — HTTPException is handled by FastAPI
+    if isinstance(exc, HTTPException):
+        raise exc
+    log.error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc,
+              exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected server error occurred. Please try again."},
+    )
 
 # --- PYDANTIC SCHEMAS ---
 class UserRegister(BaseModel):
@@ -293,7 +341,9 @@ def _get_vote_state(vote: Optional[models.Vote]) -> dict:
 # ── Live feed helpers ─────────────────────────────────────────────────────────
 import hashlib, random
 
-_LIVEFEED_FILE = Path(__file__).parent.parent / "DMMPVP" / "data" / "livefeed.json"
+# livefeed.json lives inside the characters directory so it is accessible
+# through the same Docker volume (game_characters) that character saves use.
+_LIVEFEED_FILE = _CHARACTERS_DIR / "livefeed.json"
 
 def _generate_synthetic_feed(rows: list[dict], limit: int) -> list[dict]:
     """
@@ -486,7 +536,8 @@ def get_hiscores(limit: int = 50, sort: str = "total_level"):
             .limit(limit)
             .all()
         )
-        return [_build_hiscore_row(u, s) for u, s in rows]
+        if rows:
+            return [_build_hiscore_row(u, s) for u, s in rows]
     except Exception:
         pass
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Enum, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 import enum
@@ -105,20 +105,80 @@ class Vote(Base):
 
 class Donation(Base):
     """
-    טבלה חדשה וייעודית עבור האתר!
-    מכאן שרת ה-Kotlin יקרא כשהשחקן יקליד ::claimdonate
+    Legacy donation table — kept for backward compatibility with existing ::claimdonate command.
+    New purchases go through Transaction + PendingClaim instead.
     """
     __tablename__ = "donations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
 
-    package_name = Column(String(100), nullable=False) # למשל "Slayer Package"
-    usd_amount = Column(Float, nullable=False) # כמה השחקן שילם בפועל
-    tokens_to_give = Column(Integer, nullable=False) # כמה Tokens החבילה הזו שווה
+    package_name = Column(String(100), nullable=False)
+    usd_amount = Column(Float, nullable=False)
+    tokens_to_give = Column(Integer, nullable=False)
 
-    # סטטוס ההזמנה: pending (ממתין במשחק), claimed (נאסף)
     status = Column(String(20), default="pending")
 
     created_at = Column(DateTime, default=func.now())
     claimed_at = Column(DateTime, nullable=True)
+
+
+# ── Payment system models ──────────────────────────────────────────────────────
+
+class TransactionStatus(enum.Enum):
+    PENDING   = "pending"
+    COMPLETED = "completed"
+    FAILED    = "failed"
+    REFUNDED  = "refunded"
+
+
+class PaymentProvider(enum.Enum):
+    STRIPE = "stripe"
+    PAYPAL = "paypal"
+
+
+class Transaction(Base):
+    """
+    Audit log for every payment attempt (pending, completed, failed, refunded).
+    Created before the player is redirected to Stripe/PayPal; updated by the webhook.
+    """
+    __tablename__ = "transactions"
+
+    id                  = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username            = Column(String(12), nullable=False, index=True)
+    package_id          = Column(String(50), nullable=False)
+    package_name        = Column(String(100), nullable=False)
+    amount_usd          = Column(Float, nullable=False)
+    provider            = Column(Enum(PaymentProvider), nullable=False)
+    # Stripe session ID or PayPal order ID — set after provider session is created
+    provider_session_id = Column(String(255), unique=True, index=True, nullable=True)
+    status              = Column(Enum(TransactionStatus), default=TransactionStatus.PENDING, nullable=False)
+    created_at          = Column(DateTime, default=func.now())
+    completed_at        = Column(DateTime, nullable=True)
+    # Raw webhook payload stored for debugging and customer support
+    raw_webhook_payload = Column(Text, nullable=True)
+
+
+class PendingClaim(Base):
+    """
+    Written by the webhook handler after a payment is verified.
+    The in-game ::claim command reads this table to deliver items to the player.
+    claimed_status: 'unclaimed' → 'claimed'
+    """
+    __tablename__ = "pending_claims"
+
+    id             = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username       = Column(String(12), nullable=False, index=True)
+    package_id     = Column(String(50), nullable=False)
+    package_name   = Column(String(100), nullable=False)
+    tokens_to_give = Column(Integer, nullable=False)
+    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True, index=True)
+    claimed_status = Column(String(20), default="unclaimed", nullable=False)
+    created_at     = Column(DateTime, default=func.now())
+    claimed_at     = Column(DateTime, nullable=True)
+
+    # DB-level safety net: one claim per transaction, prevents duplicate fulfillment
+    # even if two webhook deliveries race past the application-level idempotency check.
+    __table_args__ = (
+        UniqueConstraint("transaction_id", name="uq_pending_claims_transaction_id"),
+    )

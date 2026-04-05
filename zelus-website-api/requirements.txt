@@ -8,3 +8,5 @@ pydantic[email]
 slowapi
 requests
 python-dotenv
+stripe
+httpx
