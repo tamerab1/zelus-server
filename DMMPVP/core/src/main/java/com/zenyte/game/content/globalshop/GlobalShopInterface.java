@@ -149,7 +149,7 @@ public class GlobalShopInterface extends Interface {
                 ItemUtil.sendItemExamine(player, item);
                 return;
             }
-            if (op.is(ShopInterface.ItemOption.VALUE) || op.is(ShopInterface.ItemOption.SHIFTED_MOBILE_VALUE)) {
+            if (op.is(ShopInterface.ItemOption.VALUE)) {
                 final int price = shop.getBuyPrice(player, item.getId());
                 if (price <= -1) {
                     player.sendMessage(item.getName() + ": currently unavailable.");
