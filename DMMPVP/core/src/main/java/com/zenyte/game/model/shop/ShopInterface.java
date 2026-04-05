@@ -109,8 +109,7 @@ public class ShopInterface extends Interface {
         BUY_1(2, 1),
         BUY_5(3, 5),
         BUY_10(4, 10),
-        BUY_50(5, 50),
-        BUY_X(6, -1),
+        BUY_X(5, -1),
         EXAMINE(10, -1);
         private static final ItemOption[] values = values();
         public final int optionId;
