@@ -3,6 +3,7 @@ package com.near_reality.game.content.bountyhunter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.zenyte.game.content.killstreak.LiveFeedWriter;
 import com.zenyte.game.item.Item;
 import com.zenyte.game.world.World;
 import com.zenyte.game.world.entity.player.MessageType;
@@ -124,7 +125,8 @@ public class BountyManager {
                 target.getName(), amount);
         activeBounties.put(targetKey, bounty);
         save();
-        writeLiveFeedEvent(placer.getName(), target.getName(), amount);
+        LiveFeedWriter.appendEvent("bounty_placed",
+                placer.getName() + " placed a " + amount + " Blood Money bounty on " + target.getName() + "'s head!");
 
         // Broadcast
         final String announcement = "<img=13><shad=000000>[Bounty Hunter] "
@@ -170,6 +172,8 @@ public class BountyManager {
         killer.getInventory().addOrDrop(new Item(BLOOD_MONEY_ID, bounty.amount));
         activeBounties.remove(targetKey);
         save();
+        LiveFeedWriter.appendEvent("bounty_claimed",
+                killer.getName() + " claimed the " + bounty.amount + " BM bounty on " + victim.getName() + "!");
 
         // Broadcast
         final String announcement = "<img=13><shad=000000>[Bounty Hunter] "

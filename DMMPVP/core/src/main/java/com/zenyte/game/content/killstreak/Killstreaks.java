@@ -70,9 +70,10 @@ public class Killstreaks {
         final int newStreak = attackerCurrentStreak + 1;
         announceKillstreak(attacker, newStreak);
 
-        // Write to livefeed.json so the website shows this kill in real time.
+        // Write to livefeed.json — every kill and the current streak count.
         LiveFeedWriter.appendEvent("pvp_kill",
-                attacker.getName() + " slew " + victim.getName() + " in the Wilderness.");
+                attacker.getName() + " slew " + victim.getName() + " in the Wilderness."
+                + (newStreak > 1 ? " (killstreak: " + newStreak + ")" : ""));
     }
 
 

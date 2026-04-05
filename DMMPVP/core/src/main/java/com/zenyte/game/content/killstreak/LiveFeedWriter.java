@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -28,12 +29,12 @@ public final class LiveFeedWriter {
     private static final Logger log = LoggerFactory.getLogger(LiveFeedWriter.class);
 
     /**
-     * Written inside {@code data/characters/} so that the shared Docker volume
-     * ({@code game_characters}) exposes it to the API container automatically.
-     * The website API looks for the file in the same characters directory it
-     * already uses for player saves.
+     * Written to {@code data/characters/livefeed.json} inside the shared Docker volume
+     * ({@code game_characters}) so both the game and the website API container can access it.
      */
     private static final Path FEED_FILE = Paths.get("data/characters/livefeed.json");
+    private static final java.nio.file.attribute.FileAttribute<?> PERMS_644 =
+            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r--r--"));
 
     /** Maximum number of events kept in the file; older ones are dropped. */
     private static final int MAX_EVENTS = 100;
@@ -76,8 +77,12 @@ public final class LiveFeedWriter {
                 updated.add(existing.get(i));
             }
 
-            // ── Atomic write: temp → rename ────────────────────────────────────
-            final Path tmp = FEED_FILE.resolveSibling("livefeed.json.tmp");
+            // ── Atomic write: temp → rename (644 so API container can read) ────
+            final Path parent = FEED_FILE.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            final Path tmp = Files.createTempFile(
+                    parent != null ? parent : FEED_FILE.toAbsolutePath().getParent(),
+                    "livefeed", ".tmp", PERMS_644);
             Files.writeString(tmp, GSON.toJson(updated),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             try {

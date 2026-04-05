@@ -2,6 +2,7 @@ package com.zenyte.game.world.broadcasts;
 
 import com.near_reality.tools.discord.community.DiscordBroadcastKt;
 import com.near_reality.tools.discord.community.DiscordCommunityBot;
+import com.zenyte.game.content.killstreak.LiveFeedWriter;
 import com.near_reality.tools.logging.GameLogMessage;
 import com.near_reality.tools.logging.GameLogger;
 import com.zenyte.GameToggles;
@@ -226,6 +227,7 @@ public class WorldBroadcasts {
                 secondaryBuilder.append("!");
                 builder.append(secondaryBuilder);
                 player.sendAdventurersEntry(item.getId() + ".png", secondaryBuilder.toString(), false);
+                LiveFeedWriter.appendEvent("rare_drop", secondaryBuilder.toString());
                 break;
             }
             case LVL_99:
@@ -247,6 +249,7 @@ public class WorldBroadcasts {
                 secondaryBuilder.append("!");
                 builder.append(secondaryBuilder);
                 player.sendAdventurersEntry(skillName.toLowerCase() + ".png", secondaryBuilder.toString(), false);
+                LiveFeedWriter.appendEvent("level_99", secondaryBuilder.toString());
                 break;
             case MAXED:
                 builder.append("News: ");
@@ -260,6 +263,7 @@ public class WorldBroadcasts {
                 secondaryBuilder.append("!");
                 builder.append(secondaryBuilder);
                 player.sendAdventurersEntry(AdventurersLogIcon.OVERALL_SKILLING, secondaryBuilder.toString());
+                LiveFeedWriter.appendEvent("maxed", secondaryBuilder.toString());
                 break;
             case XP_200M:
                 if (!(args[0] instanceof Integer skill)) {

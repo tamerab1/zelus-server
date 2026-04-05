@@ -52,6 +52,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -676,7 +679,10 @@ public final class LoginManager {
         final String username = player.getUsername();
         final String fileName = username + EXTENSION;
         try {
-            final Path tempFile = Files.createTempFile(PLAYER_SAVE_DIRECTORY, fileName, ".tmp");
+            // Create temp file with 644 so the website API container can read it
+            final Set<PosixFilePermission> perms644 = PosixFilePermissions.fromString("rw-r--r--");
+            final Path tempFile = Files.createTempFile(PLAYER_SAVE_DIRECTORY, fileName, ".tmp",
+                    PosixFilePermissions.asFileAttribute(perms644));
             Files.writeString(tempFile, json, StandardCharsets.UTF_8);
 
             final Path finalFile = PLAYER_SAVE_DIRECTORY.resolve(fileName);
