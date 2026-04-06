@@ -53,7 +53,7 @@ jobs:
         working-directory: DMMPVP
         run: |
           chmod +x gradlew
-          ./gradlew :core:jar :plugins:item:actions:jar runPluginScanner \
+          ./gradlew :core:jar :plugins:item:actions:jar :plugins:shops:jar runPluginScanner \
             --no-daemon --rerun-tasks -q
           echo "Build complete."
 
@@ -91,6 +91,10 @@ jobs:
             root@${{ secrets.VPS_IP }}:/tmp/actions-0.1.0.jar
 
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            DMMPVP/plugins/shops/build/libs/shops-0.1.0.jar \
+            root@${{ secrets.VPS_IP }}:/tmp/shops-0.1.0.jar
+
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             DMMPVP/data/plugins.dat \
             root@${{ secrets.VPS_IP }}:/tmp/plugins.dat
 
@@ -104,6 +108,7 @@ jobs:
           set -e
           docker cp /tmp/core-0.1.0.jar       zelus_game:/server/application/lib/core-0.1.0.jar
           docker cp /tmp/actions-0.1.0.jar    zelus_game:/server/application/lib/actions-0.1.0.jar
+          docker cp /tmp/shops-0.1.0.jar      zelus_game:/server/application/lib/shops-0.1.0.jar
           docker cp /tmp/plugins.dat          zelus_game:/server/data/plugins.dat
           docker restart zelus_game
           echo "Server restarted — deploy complete!"
