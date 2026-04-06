@@ -34,8 +34,7 @@ public class Oziach extends NPCPlugin {
                             "Can I buy some equipment?")
                             .onOptionOne(() -> setKey(5))
                             .onOptionTwo(() -> {
-                                // Open jouw Global Shop in plaats van de oude shop
-                                player.getTemporaryAttributes().put("GlobalShopCategory", "Oziach's pk store");
+                                player.getTemporaryAttributes().put("GlobalShopCategory", "Melee Store");
                                 GameInterface.GLOBAL_SHOP.open(player);
                             });
                     npc(5, "Certainly, this will however cost you " + StringFormatUtil.format(PRICE.getAmount()) + " gold.");
