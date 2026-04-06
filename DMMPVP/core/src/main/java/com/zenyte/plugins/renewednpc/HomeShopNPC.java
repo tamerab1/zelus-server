@@ -45,8 +45,16 @@ public class HomeShopNPC extends NPCPlugin {
                 player.faceEntity(npc);
                 if (npc.getId() == NpcId.TRISTAN && player.getNumericAttribute("demon_kills").intValue() == 100) {
                     player.openShop("Melee Store<Alternative>");
+                } else if (npc.getId() == NpcId.JACKIE || npc.getId() == NpcId.ROBIN_HOOD) {
+                    // Jackie and Robin Hood are the donator shop NPCs.
+                    player.getTemporaryAttributes().put(GlobalShopInterface.DONATOR_MODE_KEY, Boolean.TRUE);
+                    player.getTemporaryAttributes().put("GlobalShopCategory", GlobalShopInterface.DONATOR_BOOSTERS);
+                    GameInterface.GLOBAL_SHOP.open(player);
                 } else {
-                    player.openShop(SHOPS.get(npc.getId()));
+                    final String shopName = SHOPS.get(npc.getId());
+                    if (shopName != null) {
+                        player.openShop(shopName);
+                    }
                 }
             }
 
