@@ -3,7 +3,6 @@ package com.zenyte.plugins.renewednpc;
 import com.near_reality.api.service.vote.VotePlayerAttributesKt;
 import com.near_reality.game.item.CustomItemId;
 import com.zenyte.game.GameInterface;
-import com.zenyte.game.content.globalshop.GlobalShopInterface;
 import com.zenyte.game.item.Item;
 import com.zenyte.game.item.ItemId;
 import com.zenyte.game.util.Colour;
@@ -45,11 +44,6 @@ public class HomeShopNPC extends NPCPlugin {
                 player.faceEntity(npc);
                 if (npc.getId() == NpcId.TRISTAN && player.getNumericAttribute("demon_kills").intValue() == 100) {
                     player.openShop("Melee Store<Alternative>");
-                } else if (npc.getId() == NpcId.JACKIE || npc.getId() == NpcId.ROBIN_HOOD) {
-                    // Jackie and Robin Hood are the donator shop NPCs.
-                    player.getTemporaryAttributes().put(GlobalShopInterface.DONATOR_MODE_KEY, Boolean.TRUE);
-                    player.getTemporaryAttributes().put("GlobalShopCategory", GlobalShopInterface.DONATOR_BOOSTERS);
-                    GameInterface.GLOBAL_SHOP.open(player);
                 } else {
                     final String shopName = SHOPS.get(npc.getId());
                     if (shopName != null) {
@@ -101,9 +95,8 @@ public class HomeShopNPC extends NPCPlugin {
 
             @Override
             public void handle(final Player player, final NPC npc) {
-                player.getTemporaryAttributes().put(GlobalShopInterface.DONATOR_MODE_KEY, Boolean.TRUE);
-                player.getTemporaryAttributes().put("GlobalShopCategory", GlobalShopInterface.DONATOR_BOOSTERS);
-                GameInterface.GLOBAL_SHOP.open(player);
+                player.openShop("Donator store");
+                player.sendMessage("You currently have " + Colour.RED.wrap(player.getDonorPoints()) + " donator points.");
             }
 
             @Override
@@ -154,6 +147,7 @@ public class HomeShopNPC extends NPCPlugin {
 
     @Override
     public int[] getNPCs() {
-        return new int[] { NpcId.ARNAS, NpcId.ROBIN_HOOD, NpcId.FAE, NpcId.JOHN_16007, NpcId.JACKIE, NpcId.FRANK, NpcId.TRISTAN, NpcId.HERQUIN, NpcId.BABA_YAGA };
+        // Jackie (16008) and Robin Hood (16003) are handled by DonatorShopNPC.
+        return new int[] { NpcId.ARNAS, NpcId.FAE, NpcId.JOHN_16007, NpcId.FRANK, NpcId.TRISTAN, NpcId.HERQUIN, NpcId.BABA_YAGA };
     }
 }
