@@ -326,7 +326,7 @@ public enum ShopNPCHandler {
     // TODO: Verify exitence
     ORE_SELLER("Ore Seller", ORDAN),
     ORE_STORE("Ore store", HRING_HRING),
-    OZIACHS_ARMOUR("Melee shop", OZIACH),
+    OZIACHS_ARMOUR("Melee Store", OZIACH),
     PERRYS_CHOP_CHOP_SHOP("Perry's Chop-chop Shop", // TODO: Open through dialogue, no trade option.
     PERRY),
     // TODO: Open through dialogue, no trade option.

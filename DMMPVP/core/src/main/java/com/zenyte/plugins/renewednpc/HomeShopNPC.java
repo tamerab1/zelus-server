@@ -147,7 +147,6 @@ public class HomeShopNPC extends NPCPlugin {
 
     @Override
     public int[] getNPCs() {
-        // Jackie (16008) and Robin Hood (16003) are handled by DonatorShopNPC.
-        return new int[] { NpcId.ARNAS, NpcId.FAE, NpcId.JOHN_16007, NpcId.FRANK, NpcId.TRISTAN, NpcId.HERQUIN, NpcId.BABA_YAGA };
+        return new int[] { NpcId.ARNAS, NpcId.ROBIN_HOOD, NpcId.FAE, NpcId.JOHN_16007, NpcId.JACKIE, NpcId.FRANK, NpcId.TRISTAN, NpcId.HERQUIN, NpcId.BABA_YAGA };
     }
 }
