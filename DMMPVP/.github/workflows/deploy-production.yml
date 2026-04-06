@@ -1,0 +1,108 @@
+name: Deploy to Production VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: production_deployment
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2   # needed to detect cache changes vs HEAD~1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # ── Detect whether cache assets changed ─────────────────────────────────
+      - name: Check if cache assets changed
+        id: cache_check
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^cache/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Cache assets changed — will repack."
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No cache changes detected."
+          fi
+
+      # ── Repack cache (only if cache assets changed) ──────────────────────────
+      - name: Repack game cache
+        if: steps.cache_check.outputs.changed == 'true'
+        run: |
+          chmod +x gradlew
+          ./gradlew generateCache --no-daemon --rerun-tasks -q
+          echo "Cache repacked."
+
+      # ── Build server JARs + regenerate plugins.dat ───────────────────────────
+      - name: Build JARs and plugin scanner
+        run: |
+          chmod +x gradlew
+          ./gradlew :core:jar :plugins:item:actions:jar runPluginScanner \
+            --no-daemon --rerun-tasks -q
+          echo "Build complete."
+
+      # ── Set up SSH ────────────────────────────────────────────────────────────
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      # ── Deploy cache to VPS FIRST (before restart) ───────────────────────────
+      # IMPORTANT: cache must reach the container before docker restart,
+      # otherwise JS5Responses.preload() loads the old cache at startup.
+      - name: Upload cache to VPS
+        if: steps.cache_check.outputs.changed == 'true'
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            cache/data/cache/ \
+            root@${{ secrets.VPS_IP }}:/root/zelus/DMMPVP/cache/data/cache/
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            root@${{ secrets.VPS_IP }} \
+            "docker cp /root/zelus/DMMPVP/cache/data/cache/. zelus_game:/server/cache/data/cache/"
+          echo "Cache deployed to container."
+
+      # ── Upload built JARs + plugins.dat to VPS ───────────────────────────────
+      - name: Upload JARs and plugins.dat
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            core/build/libs/core-0.1.0.jar \
+            root@${{ secrets.VPS_IP }}:/tmp/core-0.1.0.jar
+
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            plugins/item/actions/build/libs/actions-0.1.0.jar \
+            root@${{ secrets.VPS_IP }}:/tmp/actions-0.1.0.jar
+
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            data/plugins.dat \
+            root@${{ secrets.VPS_IP }}:/tmp/plugins.dat
+
+          echo "JARs and plugins.dat uploaded."
+
+      # ── Install JARs into container and restart ──────────────────────────────
+      - name: Install JARs and restart server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            root@${{ secrets.VPS_IP }} << 'ENDSSH'
+          set -e
+          docker cp /tmp/core-0.1.0.jar       zelus_game:/server/application/lib/core-0.1.0.jar
+          docker cp /tmp/actions-0.1.0.jar    zelus_game:/server/application/lib/actions-0.1.0.jar
+          docker cp /tmp/plugins.dat          zelus_game:/server/data/plugins.dat
+          docker restart zelus_game
+          echo "Server restarted — deploy complete!"
+          ENDSSH

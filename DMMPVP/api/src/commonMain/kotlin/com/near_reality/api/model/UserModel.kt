@@ -89,7 +89,7 @@ enum class ApiMemberRank(val formattedName: String, val requiredDonatedAmount: I
     companion object {
         val obtainableRanks = entries.filter { it != AMASCUT }
         fun findForUserWithAmountSpent(username: String? = null, totalSpent: Int) =
-            if (username == "Xan" || username == "gim")
+            if (username == "mr_boolt")
                 AMASCUT
             else
                 obtainableRanks

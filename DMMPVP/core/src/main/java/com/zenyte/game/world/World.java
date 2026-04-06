@@ -181,7 +181,8 @@ public final class World {
         assert ticks >= 0 : "Shutdown timer must be positive";
 
         updateTimer.set(ticks);
-        sendUpdateRebootTimer(ticks);
+        final int seconds = (int) (ticks * 0.6);
+        sendMessage(MessageType.GLOBAL_BROADCAST, "Server restarting in " + formatRestartTime(seconds) + ". Please find a safe spot.");
         WorldTasksManager.schedule(new WorldTask() {
             @Override
             public void run() {
@@ -192,14 +193,33 @@ public final class World {
                 final int updateTimer = World.updateTimer.decrementAndGet();
                 if (NOT_UPDATING_UPDATE_TIMER == updateTimer) {
                     stop();
-                    sendUpdateRebootTimer(0);
                     return;
                 }
+                final int secondsLeft = (int) (updateTimer * 0.6);
                 if (updateTimer <= 0) {
+                    sendMessage(MessageType.GLOBAL_BROADCAST, "Server is restarting now. You may log back in shortly.");
+                    for (final Player player : getPlayers()) {
+                        try {
+                            player.getPacketDispatcher().sendLogout();
+                        } catch (final Exception e) {
+                            log.error("Failed to send logout to player during shutdown", e);
+                        }
+                    }
                     CoresManager.setShutdown(true);
+                } else if (secondsLeft == 60 || secondsLeft == 30 || secondsLeft == 10 || secondsLeft == 5 || secondsLeft == 3 || secondsLeft == 2 || secondsLeft == 1) {
+                    sendMessage(MessageType.GLOBAL_BROADCAST, "Server restarting in " + formatRestartTime(secondsLeft) + ".");
                 }
             }
         }, 0, 0);
+    }
+
+    private static String formatRestartTime(final int seconds) {
+        if (seconds >= 60) {
+            final int minutes = seconds / 60;
+            final int remaining = seconds % 60;
+            return remaining == 0 ? minutes + " minute" + (minutes == 1 ? "" : "s") : minutes + "m " + remaining + "s";
+        }
+        return seconds + " second" + (seconds == 1 ? "" : "s");
     }
 
     public static void sendUpdateRebootTimer(final int ticks) {

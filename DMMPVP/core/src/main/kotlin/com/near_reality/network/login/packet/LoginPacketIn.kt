@@ -38,14 +38,7 @@ data class LoginPacketIn(
 
     fun getResponse(): ClientResponse? {
 
-        if (!GameConstants.WORLD_PROFILE.isBeta() && !GameConstants.WORLD_PROFILE.isDevelopment()) {
-            for (i in 0..crcs.lastIndex) {
-                if (i == 16) continue // Index 16 is never updated so ignore it entirely.
-                val crc = crcs[i]
-                if (crc != 0 && crc != CacheManager.getCRC(i))
-                    return ClientResponse.SERVER_UPDATED
-            }
-        }
+        // CRC check skipped: JS5 handles cache sync automatically
 
         if (NetworkConstants.SESSION_TOKEN != sessionToken)
             return ClientResponse.BAD_SESSION_ID

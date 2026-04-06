@@ -2778,7 +2778,11 @@ public final class GameCommands {
             final GameMode gameMode = p.getGameMode();
             final StringBuilder bldr = new StringBuilder();
             int delay = 0;
-            if (p.isStaff()) {
+            if (isOwner(p)) {
+                bldr.append("<col=8b0000><shad=000000>");
+                bldr.append("[OWNER] ").append(privilege.crown().getCrownTag()).append(gameMode.crown().getCrownTag()).append(p.getName());
+                bldr.append("</col></shad>: <col=990000>");
+            } else if (p.isStaff()) {
                 bldr.append("<col=").append(privilege.getYellColor()).append("><shad=000000>");
                 if (p.isMember()) {
                     bldr.append("[").append(privilege.crown().getCrownTag()).append(gameMode.crown().getCrownTag()).append(member.crown().getCrownTag()).append(p.getName()).append("]");

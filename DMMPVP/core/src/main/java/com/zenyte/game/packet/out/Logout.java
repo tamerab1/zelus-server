@@ -21,7 +21,7 @@ public final class Logout implements GamePacketEncoder {
 	@Override
 	public GamePacketOut encode() {
 		final GamePacketOut buffer = ServerProt.LOGOUT.gamePacketOut();
-		buffer.writeByte(0); // TODO: Logout response type.
+		buffer.writeByte(1); // 1 = "You were disconnected from the server." - properly resets loginIndex
 		return buffer;
 	}
 

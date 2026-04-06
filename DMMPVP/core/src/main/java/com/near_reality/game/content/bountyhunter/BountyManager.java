@@ -199,21 +199,21 @@ public class BountyManager {
         final java.util.List<String> lines = new java.util.ArrayList<>();
 
         if (activeBounties.isEmpty()) {
-            lines.add("<col=ff0000>There are currently no active bounties.</col>");
+            lines.add("<col=ffffff>There are currently no active bounties.</col>");
             lines.add("");
-            lines.add("Place a bounty on a player by using the BH Chest.");
+            lines.add("<col=c8b878>Place a bounty on a player by using the BH Chest.</col>");
         } else {
-            lines.add("<col=ff981f>Target</col>               <col=ff981f>Reward</col>             <col=ff981f>Placed By</col>");
-            lines.add("――――――――――――――――――――――――――――――――――――――――――――――");
+            lines.add("<col=d4af37>Target             Reward        Placed By</col>");
+            lines.add("<col=7a6a40>――――――――――――――――――――――――――――――――――――――――――</col>");
             int index = 1;
             for (ActiveBounty bounty : activeBounties.values()) {
-                lines.add("<col=ffffff>" + index + ". <col=ff0000>" + bounty.targetName
-                        + "</col>   <col=ffff00>" + bounty.amount + " BM</col>"
-                        + "   <col=aaaaaa>" + bounty.placerName + "</col>");
+                lines.add("<col=ffffff>" + index + ". " + bounty.targetName
+                        + "</col>   <col=d4af37>" + bounty.amount + " BM</col>"
+                        + "   <col=c8bfb0>" + bounty.placerName + "</col>");
                 index++;
             }
             lines.add("");
-            lines.add("<col=aaaaaa>Total active bounties: <col=ffffff>" + activeBounties.size() + "</col>");
+            lines.add("<col=c8bfb0>Total active bounties: <col=ffffff>" + activeBounties.size() + "</col>");
         }
 
         Diary.sendJournal(player, "<col=ff0000><img=13> Active Bounties</col>", lines);

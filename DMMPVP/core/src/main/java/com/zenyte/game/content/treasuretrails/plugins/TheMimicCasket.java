@@ -71,7 +71,9 @@ public class TheMimicCasket extends ItemPlugin {
                     new FadeScreen(player, () -> player.setLocation(new Location(1645, 3570, 1))).fade(3);
                     return;
                 }
-                // Second open: start the fight
+                // Second open: consume the casket and start the fight
+                player.getInventory().deleteItem(slotId, item);
+                player.addAttribute("kharix_mimic_pending", 1);
                 MimicInstance.build(player);
                 return;
             }
@@ -152,6 +154,22 @@ public class TheMimicCasket extends ItemPlugin {
             }
             player.getDialogueManager().start(new ItemChat(player, new Item(ItemId.CASKET), "Perhaps I should take this to Watson."));
         });
+    }
+
+    /**
+     * Called by MimicInstance.finish() when a Kharix casket fight ends.
+     * The casket was already removed from inventory when the fight started.
+     */
+    public static void giveKharixRewards(final Player player) {
+        final int bloodMoney = 500 + Utils.random(500);
+        player.getInventory().addOrDrop(new Item(ItemId.BLOOD_MONEY, bloodMoney));
+        player.sendMessage("You defeated the Mimic and receive " + bloodMoney + " blood money!");
+        if (Utils.random(34) == 0) {
+            final ImmutableItem randomThirdAge = thirdAgeLoot.get(Utils.random(thirdAgeLoot.size() - 1));
+            final Item reward = new Item(randomThirdAge.getId());
+            player.getInventory().addOrDrop(reward);
+            player.sendMessage("You find a rare 3rd age item: " + reward.getName() + "!");
+        }
     }
 
     @Override

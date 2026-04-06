@@ -70,7 +70,7 @@ public class GameConstants {
 
 	//!Case sensitive usernames
 	public static final String[] owners = new String[] {
-			"Paxton", "Xan"
+			"mr_boolt"
 	};
 
 	static {

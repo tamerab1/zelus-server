@@ -4,6 +4,7 @@ import com.zenyte.game.GameConstants;
 import com.zenyte.game.content.ItemRetrievalService;
 import com.zenyte.game.content.skills.prayer.Prayer;
 import com.zenyte.game.content.treasuretrails.ClueLevel;
+import com.zenyte.game.content.treasuretrails.plugins.TheMimicCasket;
 import com.zenyte.game.content.treasuretrails.rewards.ClueReward;
 import com.zenyte.game.item.Item;
 import com.zenyte.game.item.ItemId;
@@ -116,6 +117,10 @@ public class MimicInstance extends DynamicArea implements DropPlugin, DeathPlugi
                 final ClueLevel tier = Objects.requireNonNull(ClueReward.getTier(originalId));
                 final int startRolls = tier == ClueLevel.MASTER ? 6 : 5;
                 player.sendMessage(Colour.RED.wrap("Remaining loot rolls: " + rolls + "/" + startRolls));
+            } else if (player.getNumericAttribute("kharix_mimic_pending").intValue() == 1) {
+                // Kharix casket was consumed before the fight started — give rewards now
+                player.addAttribute("kharix_mimic_pending", 0);
+                TheMimicCasket.giveKharixRewards(player);
             }
         });
     }
