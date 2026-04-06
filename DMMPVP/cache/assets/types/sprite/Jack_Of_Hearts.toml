@@ -1,0 +1,9 @@
+# Jack Of Hearts
+[sprite]
+inherit = 3285
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3285_0.png"

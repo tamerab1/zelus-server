@@ -1,0 +1,53 @@
+// 2396
+[clientscript,script2396](component $component0, component $component1, component $component2, component $component3, component $component4)
+
+def_enum $enum5 = ~script_900();
+if ($enum5 == null) {
+return;
+}
+
+def_sprite $sprite6 = 2138;
+def_int $int7 = 3517;
+
+if ($component0 != null) {
+if_setnoclickthrough(true, $component2);
+if_setnoclickthrough(true, $component1);
+if_setvarphook($component0, 1054, 1055, 1795, &script2396(null, $component1, $component2, $component3, $component4));
+}
+
+if (~script_2414() == 1) {
+if_sethide(false, $component1);
+if_sethide(false, $component2);
+if_sethide(false, $component3);
+if_sethide(false, $component4);
+
+if_setcontextmenuoption(1, "Presets", $component1);
+if_setsprite($component2, $sprite6);
+
+if_setonmouseover(&script_44($component2, $int7), $component1);
+if_setonmouseleave(&script_44($component2, $sprite6), $component1);
+
+if (~script_3325() == 1 && getvarbit(6713) == 0) {
+if_setcontextmenuoption(2, "", $component1);
+} else {
+if_setcontextmenuoption(2, "Bond Pouch", $component1);
+}
+
+if_setonclick(&script_489(CTX_MENU_OPTION, 6), $component1);
+
+if ($enum5 == 1129) {
+if_setposition(0, 83, ^setpos_abs_left, ^setpos_abs_top, widget(160, 42));
+} else {
+if_setposition(85, 143, ^setpos_abs_left, ^setpos_abs_top, widget(160, 42));
+}
+} else {
+if_sethide(true, $component1);
+if_sethide(true, $component2);
+if_sethide(true, $component3);
+if_sethide(true, $component4);
+
+if_clearcontextmenu($component1);
+if_setonclick(null, $component1);
+}
+
+return;

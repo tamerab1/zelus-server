@@ -1,0 +1,12 @@
+[[item]]
+inherit = 24709
+id = 31005
+invmodel = 11047
+originalcolours = [-14052, -14021]
+replacementcolours = [18522, 15522]
+zoom = 1474
+ops= ["", "", "", "", "Drop"]
+stackable = 1
+tradeable=1
+grandexchange=true
+name = "Vote Gem"

@@ -1,0 +1,9 @@
+# 10 Of Diamonds
+[sprite]
+inherit = 3312
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3312_0.png"

@@ -1,0 +1,9 @@
+# King Of Clubs
+[sprite]
+inherit = 3296
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3296_0.png"

@@ -1,0 +1,9 @@
+# Queen Of Diamonds
+[sprite]
+inherit = 3310
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3310_0.png"

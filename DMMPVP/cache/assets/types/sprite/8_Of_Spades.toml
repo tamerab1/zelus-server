@@ -1,0 +1,9 @@
+# 8 Of Spades
+[sprite]
+inherit = 3327
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3327_0.png"

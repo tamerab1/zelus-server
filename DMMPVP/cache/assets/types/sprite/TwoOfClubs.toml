@@ -1,0 +1,9 @@
+# 2 Of Clubs
+[sprite]
+inherit = 3307
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3307_0.png"

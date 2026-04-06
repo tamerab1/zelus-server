@@ -1,0 +1,45 @@
+void script_2396(Widget widget0, Widget widget1, Widget widget2, Widget widget3, Widget widget4) {
+	Enum enum5;
+	Sprite sprite6;
+	int int7;
+	enum5 = script_900();
+	if (enum5 == null) {
+		return;
+	}
+	sprite6 = 2138;
+	int7 = 3517;
+	if (widget0 != null) {
+		widget2.setNoClickThrough(1);
+		widget1.setNoClickThrough(1);
+		widget0.hookVARP(&script_2396(null, widget1, widget2, widget3, widget4), 1054, 1055, 1795);
+	}
+	if (script_2414() == 1) {
+		widget1.setIsHidden(false);
+		widget2.setIsHidden(false);
+		widget3.setIsHidden(false);
+		widget4.setIsHidden(false);
+		widget1.setContextMenuOption(1, "Presets");
+		widget2.setSprite(sprite6);
+		widget1.hookMouseHover(&script_44(widget2, (Sprite)int7));
+		widget1.hookMouseExit(&script_44(widget2, sprite6));
+		if (script_3325() == 1 && VARPBIT[6713] == 0) {
+			widget1.setContextMenuOption(2, "");
+		} else {
+			widget1.setContextMenuOption(2, "Last preset");
+		}
+		widget1.hookOptionClick(&script_489(CTX_MENU_OPTION, 6));
+		if (enum5 == 1129) {
+			widget(160, 42).setPosition(0, 83, 2, 0);
+		} else {
+			widget(160, 42).setPosition(85, 143, 0, 0);
+		}
+	} else {
+		widget1.setIsHidden(true);
+		widget2.setIsHidden(true);
+		widget3.setIsHidden(true);
+		widget4.setIsHidden(true);
+		widget1.setNoOptions();
+		widget1.hookOptionClick(null);
+	}
+	return;
+}

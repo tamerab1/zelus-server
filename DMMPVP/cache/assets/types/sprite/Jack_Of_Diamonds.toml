@@ -1,0 +1,9 @@
+# Jack Of Diamonds
+[sprite]
+inherit = 3281
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3311_0.png"

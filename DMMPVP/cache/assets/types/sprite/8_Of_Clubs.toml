@@ -1,0 +1,9 @@
+# 8 Of Clubs
+[sprite]
+inherit = 3301
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3301_0.png"

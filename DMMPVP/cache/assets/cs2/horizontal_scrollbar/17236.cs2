@@ -1,0 +1,68 @@
+void script_17236(Widget widget0, Widget widget1, Sprite sprite2, Sprite sprite3, Sprite sprite4, Sprite sprite5, Sprite sprite6, Sprite sprite7) {
+    int int8;
+    int int9;
+
+    CHILD.createChild(widget0, 5, 0);
+    CHILD.setPosition(0, 0, 1, 1);
+    CHILD.setSize(1, 32, 1, 0);  // Width-based
+    CHILD.setSprite(sprite2);
+    CHILD.setSpriteTiling(false);
+    CHILD.hookMousePress(&script_44(widget0, widget1, MOUSE_X));  // Use MOUSE_X for horizontal input
+    CHILD.hookScroll(&script_46(widget0, widget1, MOUSE_X));  // Use MOUSE_X for scroll
+    CHILD.setNoClickThrough(1);
+
+    _CHILD.createChild(widget0, 5, 1);
+    _CHILD.setPosition(16, 0, 0, 1);  // Adjusted for horizontal positioning
+    int8 = widget1.getScrollMaxH();  // Use horizontal scroll max
+    if (int8 <= 0) {
+        int8 = widget1.getWidth();  // Get width instead of height
+    }
+    int9 = 0;
+    if (int8 > 0) {
+        int9 = (widget0.getWidth() - 32) * widget1.getWidth() / int8;  // Adjusted for horizontal scaling
+    } else {
+        int9 = widget0.getWidth() - 32;
+    }
+    if (int9 < 10) {
+        int9 = 10;
+    }
+    _CHILD.setSize(int9, 1, 0, 1);  // Adjusted for width
+    _CHILD.setSprite(sprite4);
+    _CHILD.setSpriteTiling(false);
+    _CHILD.setDraggable(widget0, 0);
+    _CHILD.hookDragStart(&script_45(widget0, widget1, MOUSE_X, false));  // Adjusted to MOUSE_X
+    _CHILD.hookDragRelease(&script_45(widget0, widget1, MOUSE_X, true));  // Adjusted to MOUSE_X
+    _CHILD.setDragRenderBehaviour(1);
+
+    CHILD.createChild(widget0, 5, 2);
+    CHILD.setPosition(_CHILD.getX(), 0, 0, 1);
+    CHILD.setSize(5, 1, 0, 1);  // Adjusted for width
+    CHILD.setSprite(sprite3);
+    CHILD.setSpriteTiling(false);
+
+    CHILD.createChild(widget0, 5, 3);
+    CHILD.setPosition(_CHILD.getX() + _CHILD.getWidth() - 5, 0, 0, 1);
+    CHILD.setSize(5, 1, 0, 1);
+    CHILD.setSprite(sprite5);
+    CHILD.setSpriteTiling(false);
+
+    CHILD.createChild(widget0, 5, 4);
+    CHILD.setPosition(0, 0, 0, 1);
+    CHILD.setSize(16, 0, 0, 1);  // Adjusted width-based
+    CHILD.setSprite(sprite6);
+    CHILD.setSpriteTiling(false);
+    CHILD.hookDraggedOver(&script_42(widget0, widget1));
+    CHILD.setNoClickThrough(1);
+
+    CHILD.createChild(widget0, 5, 5);
+    CHILD.setPosition(0, 0, 2, 1);
+    CHILD.setSize(16, 0, 0, 1);
+    CHILD.setSprite(sprite7);
+    CHILD.setSpriteTiling(false);
+    CHILD.hookDraggedOver(&script_43(widget0, widget1));
+    CHILD.setNoClickThrough(1);
+
+    widget1.hookScroll(&script_46(widget0, widget1, MOUSE_X));  // Use MOUSE_X for scroll
+
+    return;
+}

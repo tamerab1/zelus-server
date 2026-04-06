@@ -1,0 +1,9 @@
+# 7 Of Hearts
+[sprite]
+inherit = 3289
+
+width = 47
+height = 62
+
+[sprite.images]
+0 = "blackjack_test/3289_0.png"

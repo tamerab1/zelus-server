@@ -30,7 +30,7 @@ venv/
 .DS_Store
 
 # Game server — large binary data (not for git)
-DMMPVP/cache/
+DMMPVP/cache/data/
 DMMPVP/data/characters/
 DMMPVP/data/backups/
 DMMPVP/data/logs/
