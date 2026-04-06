@@ -3,6 +3,7 @@ package com.zenyte.plugins.renewednpc;
 import com.near_reality.api.service.vote.VotePlayerAttributesKt;
 import com.near_reality.game.item.CustomItemId;
 import com.zenyte.game.GameInterface;
+import com.zenyte.game.content.globalshop.GlobalShopInterface;
 import com.zenyte.game.item.Item;
 import com.zenyte.game.item.ItemId;
 import com.zenyte.game.util.Colour;
@@ -92,8 +93,9 @@ public class HomeShopNPC extends NPCPlugin {
 
             @Override
             public void handle(final Player player, final NPC npc) {
-                player.openShop("Donator Shop");
-                player.sendMessage("You currently have " + Colour.RED.wrap(player.getDonorPoints()) + " donator points.");
+                player.getTemporaryAttributes().put(GlobalShopInterface.DONATOR_MODE_KEY, Boolean.TRUE);
+                player.getTemporaryAttributes().put("GlobalShopCategory", GlobalShopInterface.DONATOR_BOOSTERS);
+                GameInterface.GLOBAL_SHOP.open(player);
             }
 
             @Override
